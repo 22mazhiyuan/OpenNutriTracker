@@ -42,11 +42,9 @@ class DashboardWidget extends StatefulWidget {
 
 class _DashboardWidgetState extends State<DashboardWidget> {
   void _openKcalGoalInfoScreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const KcalGoalInfoScreen(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const KcalGoalInfoScreen()));
   }
 
   @override
@@ -70,9 +68,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
     } else {
       kcalValue = widget.totalKcalLeft;
       gaugeValue =
-          (widget.totalKcalDaily - widget.totalKcalLeft) / widget.totalKcalDaily;
+          (widget.totalKcalDaily - widget.totalKcalLeft) /
+          widget.totalKcalDaily;
     }
-    final displayValue = usesKilojoules ? UnitCalc.kcalToKj(kcalValue) : kcalValue;
+    final displayValue = usesKilojoules
+        ? UnitCalc.kcalToKj(kcalValue)
+        : kcalValue;
     final displaySupplied = usesKilojoules
         ? UnitCalc.kcalToKj(widget.totalKcalSupplied)
         : widget.totalKcalSupplied;
@@ -88,11 +89,21 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         : Theme.of(context).colorScheme.primary;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Dimens.spacing16, Dimens.spacing8, Dimens.spacing16, Dimens.spacing4),
+      padding: const EdgeInsets.fromLTRB(
+        Dimens.spacing16,
+        Dimens.spacing8,
+        Dimens.spacing16,
+        Dimens.spacing4,
+      ),
       child: Column(
         children: [
           AppCard(
-            padding: const EdgeInsets.fromLTRB(Dimens.spacing24, Dimens.spacing20, Dimens.spacing24, Dimens.spacing24),
+            padding: const EdgeInsets.fromLTRB(
+              Dimens.spacing24,
+              Dimens.spacing20,
+              Dimens.spacing24,
+              Dimens.spacing24,
+            ),
             child: Column(
               children: [
                 Row(
@@ -166,10 +177,17 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                               duration: const Duration(milliseconds: 800),
                               curve: AppMotion.emphasized,
                               value: displayValue.round(),
-                              textStyle: textTheme.displaySmall?.copyWith(height: 1),
+                              textStyle: textTheme.displaySmall?.copyWith(
+                                height: 1,
+                              ),
                             ),
                             const SizedBox(height: 2),
-                            Text(kcalLabelText, style: textTheme.bodyMedium?.copyWith(color: palette.textMuted)),
+                            Text(
+                              kcalLabelText,
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: palette.textMuted,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -238,18 +256,31 @@ class _MiniStat extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Column(
-      crossAxisAlignment: trailing ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: trailing
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: color.withValues(alpha: 0.16), shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.16),
+            shape: BoxShape.circle,
+          ),
           child: Icon(icon, color: color, size: 20),
         ),
         const SizedBox(height: 6),
-        Text(value,
-            maxLines: 1, overflow: TextOverflow.ellipsis, style: textTheme.titleMedium),
-        Text(label,
-            maxLines: 1, overflow: TextOverflow.ellipsis, style: textTheme.labelSmall),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: textTheme.titleMedium,
+        ),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: textTheme.labelSmall,
+        ),
       ],
     );
   }
@@ -276,13 +307,22 @@ class _MacroTile extends StatelessWidget {
     final pct = (goal <= 0) ? 0.0 : (intake / goal).clamp(0.0, 1.0);
     return AppCard(
       borderRadius: Dimens.radiusM,
-      padding: const EdgeInsets.fromLTRB(Dimens.spacing16, Dimens.spacing16, Dimens.spacing16, Dimens.spacing16),
+      padding: const EdgeInsets.fromLTRB(
+        Dimens.spacing16,
+        Dimens.spacing16,
+        Dimens.spacing16,
+        Dimens.spacing16,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(width: 9, height: 9, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+              Container(
+                width: 9,
+                height: 9,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
               const SizedBox(width: 6),
               Flexible(child: Text(label, style: textTheme.labelMedium)),
             ],
@@ -300,7 +340,10 @@ class _MacroTile extends StatelessWidget {
           const SizedBox(height: Dimens.spacing12),
           Text(
             '${intake.toInt()}/${goal.toInt()} g',
-            style: textTheme.bodySmall?.copyWith(color: palette.textStrong, fontWeight: FontWeight.w700),
+            style: textTheme.bodySmall?.copyWith(
+              color: palette.textStrong,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),

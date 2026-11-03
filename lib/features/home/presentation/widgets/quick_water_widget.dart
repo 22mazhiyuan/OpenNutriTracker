@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:opennutritracker/core/presentation/widgets/glass_surface.dart';
+import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/log_water_dialog.dart';
@@ -125,9 +125,7 @@ class QuickWaterWidget extends StatelessWidget {
 
     return Semantics(
       identifier: 'home-water-chip',
-      child: AppPalette.glassActive
-          ? GlassSurface(child: body)
-          : Material(color: palette.surface, shape: Dimens.shapeL, child: body),
+      child: AppCard(child: body),
     );
   }
 }

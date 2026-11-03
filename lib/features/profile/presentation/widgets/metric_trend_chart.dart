@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:opennutritracker/core/presentation/widgets/axis_title.dart';
 import 'package:opennutritracker/core/utils/calc/calendar_day_calc.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
@@ -98,8 +99,10 @@ class MetricTrendChart extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 44,
-                  getTitlesWidget: (value, meta) => Text(
-                    value.toStringAsFixed(value >= 10 ? 0 : 1),
+                  getTitlesWidget: (value, meta) => distinctAxisTitle(
+                    value,
+                    meta,
+                    fractionDigits: value >= 10 ? 0 : 1,
                     semanticsLabel: '${value.toStringAsFixed(1)} $unitLabel',
                     style: theme.textTheme.labelSmall,
                   ),

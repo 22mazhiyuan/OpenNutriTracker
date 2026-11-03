@@ -3,11 +3,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 
+/// Live blur deadlocks the widget-test renderer, so tests keep the frosted
+/// fill and the running app blurs.
+bool get glassBlurEnabled =>
+    !WidgetsBinding.instance.runtimeType.toString().contains('Test');
+
 /// A frosted Liquid Glass surface: background blur, a translucent fill,
 /// a bright specular edge, and a soft shadow.
 ///
-/// Used for cards, the floating tab bar, and sheets when the glass look is
-/// active. The same widget runs on Android and iOS — `BackdropFilter` is the
+/// Used for the floating tab bar. Content cards stay solid.
+/// The same widget runs on Android and iOS — `BackdropFilter` is the
 /// portable stand-in for the system material.
 class GlassSurface extends StatelessWidget {
   final Widget child;
@@ -37,11 +42,7 @@ class GlassSurface extends StatelessWidget {
     final highlight = Colors.white.withValues(alpha: isDark ? 0.22 : 0.85);
     final edge = Colors.white.withValues(alpha: isDark ? 0.14 : 0.55);
 
-    // The widget-test binding reschedules a BackdropFilter forever, so the
-    // live blur is skipped there. The app itself always blurs.
-    final liveBlur = !WidgetsBinding.instance.runtimeType.toString().contains(
-      'Test',
-    );
+    final liveBlur = glassBlurEnabled;
     final frosted = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,
@@ -107,6 +108,73 @@ class GlassSurface extends StatelessWidget {
       color: Colors.transparent,
       borderRadius: radius,
       child: InkWell(borderRadius: radius, onTap: onTap, child: sized),
+    );
+  }
+}
+
+/// Blurred bar behind an [AppBar]. Content cards do not use this.
+class GlassBarBackground extends StatelessWidget {
+  const GlassBarBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fill = DecoratedBox(
+      decoration: BoxDecoration(
+        color: (isDark ? const Color(0xFF1A201D) : Colors.white).withValues(
+          alpha: 0.78,
+        ),
+        border: Border(
+          bottom: BorderSide(
+            color: (isDark ? Colors.white : Colors.black).withValues(
+              alpha: 0.06,
+            ),
+          ),
+        ),
+      ),
+    );
+    final bar = glassBlurEnabled
+        ? ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: fill,
+            ),
+          )
+        : fill;
+    return SizedBox.expand(child: bar);
+  }
+}
+
+/// Frosted frame for a modal sheet. The sheet route itself stays transparent.
+class GlassSheet extends StatelessWidget {
+  final Widget child;
+
+  const GlassSheet({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final fill = DecoratedBox(
+      decoration: BoxDecoration(
+        color: (isDark ? const Color(0xFF1A201D) : Colors.white).withValues(
+          alpha: 0.88,
+        ),
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withValues(alpha: isDark ? 0.12 : 0.7),
+          ),
+        ),
+      ),
+      child: child,
+    );
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      child: glassBlurEnabled
+          ? BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+              child: fill,
+            )
+          : fill,
     );
   }
 }

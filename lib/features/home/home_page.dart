@@ -176,23 +176,36 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       children: [
         ListView(
           children: [
+            DashboardWidget(
+              totalKcalDaily: totalKcalDaily,
+              totalKcalLeft: totalKcalLeft,
+              totalKcalSupplied: totalKcalSupplied,
+              totalKcalBurned: totalKcalBurned,
+              totalCarbsIntake: totalCarbsIntake,
+              totalFatsIntake: totalFatsIntake,
+              totalProteinsIntake: totalProteinsIntake,
+              totalCarbsGoal: totalCarbsGoal,
+              totalFatsGoal: totalFatsGoal,
+              totalProteinsGoal: totalProteinsGoal,
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 Dimens.spacing16,
-                Dimens.spacing16,
+                Dimens.spacing8,
                 Dimens.spacing16,
                 Dimens.spacing4,
               ),
-              // Wrap rather than Row so the two chips drop onto a second line
-              // at large text scale instead of overflowing off the edge.
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      QuickWeightWidget(
-                        weightKg: userWeightKg,
-                        bodyWeightUnit: bodyWeightUnit,
+                      Expanded(
+                        child: QuickWeightWidget(
+                          weightKg: userWeightKg,
+                          bodyWeightUnit: bodyWeightUnit,
+                        ),
                       ),
                       const SizedBox(width: Dimens.spacing12),
                       const Expanded(child: StepsHomeCard()),
@@ -207,19 +220,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ),
             const FastingHomeChip(),
-            const SizedBox(height: Dimens.spacing8),
-            DashboardWidget(
-              totalKcalDaily: totalKcalDaily,
-              totalKcalLeft: totalKcalLeft,
-              totalKcalSupplied: totalKcalSupplied,
-              totalKcalBurned: totalKcalBurned,
-              totalCarbsIntake: totalCarbsIntake,
-              totalFatsIntake: totalFatsIntake,
-              totalProteinsIntake: totalProteinsIntake,
-              totalCarbsGoal: totalCarbsGoal,
-              totalFatsGoal: totalFatsGoal,
-              totalProteinsGoal: totalProteinsGoal,
-            ),
             // Day-one / empty-day guidance: when nothing is logged yet, point
             // the way to the centre + rather than leaving a silent dashboard.
             if (breakfastIntakeList.isEmpty &&

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/presentation/widgets/dynamic_ont_logo.dart';
+import 'package:opennutritracker/core/presentation/widgets/glass_surface.dart';
+import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -7,7 +9,10 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glass = AppPalette.glassActive;
     return AppBar(
+      backgroundColor: glass ? Colors.transparent : null,
+      flexibleSpace: glass ? const GlassBarBackground() : null,
       title: Row(
         children: [
           const SizedBox(width: 40, child: DynamicOntLogo()),
@@ -16,8 +21,8 @@ class HomeAppbar extends StatelessWidget implements PreferredSizeWidget {
               text: TextSpan(
                 text: S.of(context).appTitle,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

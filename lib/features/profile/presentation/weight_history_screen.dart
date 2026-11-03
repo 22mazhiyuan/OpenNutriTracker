@@ -12,6 +12,8 @@ import 'package:opennutritracker/core/domain/usecase/get_body_measurements_useca
 import 'package:opennutritracker/core/domain/usecase/delete_weight_log_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_user_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_weight_log_usecase.dart';
+import 'package:opennutritracker/core/presentation/widgets/glass_surface.dart';
+import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/utils/calc/calendar_day_calc.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/core/utils/reload_diary_and_trends.dart';
@@ -195,7 +197,13 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(S.of(context).profileWeightHistoryTitle)),
+      appBar: AppBar(
+        backgroundColor: AppPalette.glassActive ? Colors.transparent : null,
+        flexibleSpace: AppPalette.glassActive
+            ? const GlassBarBackground()
+            : null,
+        title: Text(S.of(context).profileWeightHistoryTitle),
+      ),
       floatingActionButton: Semantics(
         identifier: 'weight-history-add',
         child: FloatingActionButton.extended(

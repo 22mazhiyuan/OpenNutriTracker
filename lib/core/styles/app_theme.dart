@@ -45,7 +45,7 @@ ThemeData buildAppTheme(AppPalette p, {bool glass = false}) {
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: glass ? Colors.transparent : p.canvas,
+    scaffoldBackgroundColor: p.canvas,
     textTheme: text,
     splashFactory: InkSparkle.splashFactory,
     cardTheme: CardThemeData(
@@ -60,11 +60,12 @@ ThemeData buildAppTheme(AppPalette p, {bool glass = false}) {
     ),
     appBarTheme: AppBarThemeData(
       backgroundColor: glass ? Colors.transparent : p.canvas,
+      // Glass look blurs the bar; titles stay left, as on the original screens.
       surfaceTintColor: Colors.transparent,
       foregroundColor: p.textStrong,
       elevation: 0,
       scrolledUnderElevation: 0,
-      centerTitle: glass,
+      centerTitle: false,
       titleTextStyle: text.headlineSmall,
     ),
     navigationBarTheme: NavigationBarThemeData(
@@ -129,24 +130,15 @@ ThemeData buildAppTheme(AppPalette p, {bool glass = false}) {
       side: BorderSide.none,
     ),
     dialogTheme: DialogThemeData(
-      backgroundColor: glass
-          ? (p.brightness == Brightness.dark
-                ? const Color(0xE61A2622)
-                : const Color(0xF2FFFFFF))
-          : p.surface,
+      backgroundColor: p.surface,
       surfaceTintColor: Colors.transparent,
-      elevation: glass ? 0 : null,
       shape: const RoundedRectangleBorder(borderRadius: Dimens.borderRadiusL),
     ),
     listTileTheme: const ListTileThemeData(
       shape: RoundedRectangleBorder(borderRadius: Dimens.borderRadiusM),
     ),
     bottomSheetTheme: BottomSheetThemeData(
-      backgroundColor: glass
-          ? (p.brightness == Brightness.dark
-                ? const Color(0xF01A2622)
-                : const Color(0xF7FFFFFF))
-          : p.surface,
+      backgroundColor: p.surface,
       surfaceTintColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(

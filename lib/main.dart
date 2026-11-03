@@ -4,6 +4,8 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:opennutritracker/core/data/data_source/remote_search_cache_data_source.dart';
 import 'package:opennutritracker/core/data/data_source/user_data_source.dart';
@@ -15,7 +17,6 @@ import 'package:opennutritracker/core/presentation/main_screen.dart';
 import 'package:opennutritracker/core/presentation/splash_screen.dart';
 import 'package:opennutritracker/core/presentation/storage_recovery_app.dart';
 import 'package:opennutritracker/core/presentation/widgets/image_full_screen.dart';
-import 'package:opennutritracker/core/presentation/widgets/glass_backdrop.dart';
 import 'package:opennutritracker/core/presentation/widgets/keyboard_dismisser.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/app_theme.dart';
@@ -70,6 +71,11 @@ Future<void> _refreshDailyReminder(Locale? locale) =>
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LoggerConfig.intiLogger();
+  // The UI is Simplified Chinese on every device. Date labels (the diary
+  // month, weekday headings, history rows) follow that, not the device
+  // locale. `en` symbols ship with intl; `zh` has to be loaded.
+  await initializeDateFormatting('zh');
+  Intl.defaultLocale = 'zh';
   await _bootstrapApp();
 }
 
@@ -388,14 +394,8 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
       ],
       supportedLocales: _appLocales,
       // Above the Navigator, so dialogs and sheets are covered too.
-      builder: (context, child) {
-        final page = KeyboardDismisser(child: child ?? const SizedBox.shrink());
-        return GlassBackdrop(
-          enabled: glass,
-          dark: Theme.of(context).brightness == Brightness.dark,
-          child: page,
-        );
-      },
+      builder: (context, child) =>
+          KeyboardDismisser(child: child ?? const SizedBox.shrink()),
       initialRoute: NavigationOptions.splashRoute,
       routes: {
         NavigationOptions.splashRoute: (context) =>

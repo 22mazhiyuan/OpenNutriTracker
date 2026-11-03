@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:opennutritracker/core/presentation/widgets/glass_surface.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 
@@ -33,17 +32,6 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (AppPalette.glassActive) {
-      return GlassSurface(
-        borderRadius: borderRadius,
-        padding: padding,
-        width: width,
-        height: height,
-        onTap: onTap,
-        tint: color,
-        child: child ?? const SizedBox.shrink(),
-      );
-    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final palette = isDark ? AppPalette.dark : AppPalette.light;
     final radius = BorderRadius.circular(borderRadius);

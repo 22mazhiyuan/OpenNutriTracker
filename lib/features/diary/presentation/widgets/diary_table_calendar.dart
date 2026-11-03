@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:opennutritracker/core/domain/entity/tracked_day_entity.dart';
 import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/extensions.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+/// Weekday heading for [TableCalendar].
+///
+/// English keeps the package default (`Mon`). Chinese abbreviations are
+/// `周一`…`周日`; a one-letter heading would be `周` in every column, so
+/// the narrow form (`一`…`日`) is used instead.
+String _diaryWeekdayLabel(DateTime day, dynamic locale) {
+  final tag = locale?.toString();
+  if (tag != null && tag.toLowerCase().startsWith('zh')) {
+    return DateFormat('EEEEE', tag).format(day);
+  }
+  return DateFormat.E(tag).format(day);
+}
 
 class DiaryTableCalendar extends StatefulWidget {
   final Function(DateTime, Map<String, TrackedDayEntity>) onDateSelected;
@@ -35,15 +49,13 @@ class DiaryTableCalendar extends StatefulWidget {
 /// equals a heading's height by coincidence — it is `labelSmall`'s line
 /// height today — and scaling it lands fractionally short at some scales
 /// (20.8 against the 21.0 wanted at 1.3x), which clips just as surely.
-double _weekdayRowHeight(BuildContext context, TextStyle style) =>
-    (TextPainter(
-      // Any single line measures the same: the height comes from the font's
-      // metrics, not from which glyphs are in it.
-      text: TextSpan(text: 'Mon', style: style),
-      textDirection: Directionality.of(context),
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout())
-        .height;
+double _weekdayRowHeight(BuildContext context, TextStyle style) => (TextPainter(
+  // Any single line measures the same: the height comes from the font's
+  // metrics, not from which glyphs are in it.
+  text: TextSpan(text: 'Mon', style: style),
+  textDirection: Directionality.of(context),
+  textScaler: MediaQuery.textScalerOf(context),
+)..layout()).height;
 
 class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
   @override
@@ -54,7 +66,8 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
     final textTheme = Theme.of(context).textTheme;
     final weekdayStyle =
         textTheme.labelSmall?.copyWith(color: palette.textMuted) ??
-            const TextStyle();
+        const TextStyle();
+    final locale = Localizations.localeOf(context).toString();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -71,19 +84,32 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
           Dimens.spacing12,
         ),
         child: TableCalendar(
+          locale: locale,
           headerStyle: HeaderStyle(
             titleCentered: true,
             formatButtonVisible: false,
-            titleTextStyle: textTheme.titleMedium?.copyWith(
+            titleTextStyle:
+                textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: palette.textStrong,
                 ) ??
                 const TextStyle(),
-            leftChevronIcon: Icon(Icons.chevron_left_rounded, color: palette.textMuted, size: 26),
-            rightChevronIcon: Icon(Icons.chevron_right_rounded, color: palette.textMuted, size: 26),
-            headerPadding: const EdgeInsets.symmetric(vertical: Dimens.spacing8),
+            leftChevronIcon: Icon(
+              Icons.chevron_left_rounded,
+              color: palette.textMuted,
+              size: 26,
+            ),
+            rightChevronIcon: Icon(
+              Icons.chevron_right_rounded,
+              color: palette.textMuted,
+              size: 26,
+            ),
+            headerPadding: const EdgeInsets.symmetric(
+              vertical: Dimens.spacing8,
+            ),
           ),
           daysOfWeekStyle: DaysOfWeekStyle(
+            dowTextFormatter: _diaryWeekdayLabel,
             weekdayStyle: weekdayStyle,
             weekendStyle: weekdayStyle,
           ),
@@ -108,10 +134,17 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
           },
           calendarStyle: CalendarStyle(
             markersMaxCount: 1,
-            defaultTextStyle: textTheme.bodyMedium?.copyWith(color: palette.textStrong) ?? const TextStyle(),
-            weekendTextStyle: textTheme.bodyMedium?.copyWith(color: palette.textStrong) ?? const TextStyle(),
-            outsideTextStyle: textTheme.bodyMedium?.copyWith(color: palette.textMuted) ?? const TextStyle(),
-            todayTextStyle: textTheme.bodyMedium?.copyWith(
+            defaultTextStyle:
+                textTheme.bodyMedium?.copyWith(color: palette.textStrong) ??
+                const TextStyle(),
+            weekendTextStyle:
+                textTheme.bodyMedium?.copyWith(color: palette.textStrong) ??
+                const TextStyle(),
+            outsideTextStyle:
+                textTheme.bodyMedium?.copyWith(color: palette.textMuted) ??
+                const TextStyle(),
+            todayTextStyle:
+                textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: accent,
                 ) ??
@@ -120,7 +153,8 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
               border: Border.all(color: accent, width: 2.0),
               shape: BoxShape.circle,
             ),
-            selectedTextStyle: textTheme.bodyMedium?.copyWith(
+            selectedTextStyle:
+                textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).colorScheme.onPrimary,
                 ) ??

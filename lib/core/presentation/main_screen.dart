@@ -168,7 +168,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     ];
     return Scaffold(
       extendBody: glass,
-      backgroundColor: glass ? Colors.transparent : null,
       appBar: _appbarPages[_selectedPageIndex],
       body: Column(
         children: [
@@ -223,8 +222,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppPalette.glassActive ? Colors.transparent : null,
       builder: (BuildContext context) {
-        return AddItemBottomSheet(
+        final sheet = AddItemBottomSheet(
           day: DateTime.now(),
           showActivityTracking: config.showActivityTracking,
           usesImperialUnits: config.usesImperialFoodUnits,
@@ -233,6 +233,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
             mealSharesPct: config.mealKcalSharesPct,
           ),
         );
+        return AppPalette.glassActive ? GlassSheet(child: sheet) : sheet;
       },
     );
   }

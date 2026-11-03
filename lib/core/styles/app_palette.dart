@@ -90,31 +90,31 @@ class AppPalette {
     textMuted: Color(0xFFA39E94),
   );
 
-  /// Mint Liquid Glass. The canvas is transparent so the backdrop gradient
-  /// shows through; cards and the tab bar frost it themselves.
+  /// Mint on white, in the spirit of 薄荷健康. Cards stay solid. Only the
+  /// tab bar, app bar and sheets blur.
   static const glassLight = AppPalette(
     brightness: Brightness.light,
-    canvas: Color(0x00000000),
-    surface: Color(0xF2FFFFFF),
-    surfaceMuted: Color(0xFFE5F4EE),
-    border: Color(0x99FFFFFF),
-    shadow: Color(0x14102824),
-    // Deepened so white-on-accent stays around WCAG AA.
-    accent: Color(0xFF0C8F6A),
+    canvas: Color(0xFFF4F6F5),
+    surface: Color(0xFFFFFFFF),
+    surfaceMuted: Color(0xFFEEF3F0),
+    border: Color(0xFFE3EAE6),
+    shadow: Color(0x0F1A2E26),
+    // Bright mint, deepened just enough for white label text.
+    accent: Color(0xFF00A86B),
     onAccent: Color(0xFFFFFFFF),
     carbsColor: Color(0xFFC9841A),
     fatColor: Color(0xFFD4654C),
     proteinColor: Color(0xFF14988A),
-    textStrong: Color(0xFF163028),
-    textMuted: Color(0xFF4E675E),
+    textStrong: Color(0xFF1A1A1A),
+    textMuted: Color(0xFF6B756F),
   );
 
   static const glassDark = AppPalette(
     brightness: Brightness.dark,
-    canvas: Color(0x00000000),
-    surface: Color(0xF01A2622),
-    surfaceMuted: Color(0xFF24332E),
-    border: Color(0x33FFFFFF),
+    canvas: Color(0xFF101412),
+    surface: Color(0xFF1A201D),
+    surfaceMuted: Color(0xFF24302B),
+    border: Color(0xFF2C3833),
     shadow: Color(0x66000000),
     accent: Color(0xFF3DDCB0),
     onAccent: Color(0xFF06281A),

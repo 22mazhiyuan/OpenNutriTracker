@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/data/data_source/health/health_service.dart';
-import 'package:opennutritracker/core/presentation/widgets/glass_surface.dart';
+import 'package:opennutritracker/core/presentation/widgets/app_card.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
@@ -150,8 +150,17 @@ class _StepsHomeCardState extends State<StepsHomeCard>
               identifier: 'home-steps-enable',
               container: true,
               child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 onPressed: _connect,
-                child: Text(s.stepsHomeConnect),
+                child: Text(
+                  s.stepsHomeConnect,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
         ],
@@ -160,13 +169,7 @@ class _StepsHomeCardState extends State<StepsHomeCard>
 
     return Semantics(
       identifier: 'home-steps-card',
-      child: AppPalette.glassActive
-          ? GlassSurface(borderRadius: Dimens.radiusL, child: content)
-          : Material(
-              color: palette.surface,
-              borderRadius: Dimens.borderRadiusL,
-              child: content,
-            ),
+      child: AppCard(child: content),
     );
   }
 }
