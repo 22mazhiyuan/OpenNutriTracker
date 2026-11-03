@@ -24,4 +24,10 @@ class NoopHealthService implements HealthService {
 
   @override
   Future<double?> readLatestBodyFatPercent() async => null;
+
+  @override
+  Future<bool> requestStepPermission() async => false;
+
+  @override
+  Future<StepReadResult> readTodaySteps() async => StepReadResult.unavailable;
 }

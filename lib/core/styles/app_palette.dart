@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 
 /// The palette behind the calm friendly-flat redesign.
 ///
@@ -43,7 +44,18 @@ class AppPalette {
   Color get fat => fatColor;
   Color get protein => proteinColor;
 
-  static const light = AppPalette(
+  /// The look currently drawn. Widgets read [light] and [dark], which follow
+  /// this. The app sets it from the saved preference before the first frame
+  /// and again whenever Settings changes it.
+  static AppLook activeLook = AppLook.glass;
+
+  static bool get glassActive => activeLook == AppLook.glass;
+
+  static AppPalette get light => glassActive ? glassLight : classicLight;
+
+  static AppPalette get dark => glassActive ? glassDark : classicDark;
+
+  static const classicLight = AppPalette(
     brightness: Brightness.light,
     canvas: Color(0xFFF7F4EF),
     surface: Color(0xFFFFFFFF),
@@ -62,7 +74,7 @@ class AppPalette {
     textMuted: Color(0xFF6E685E),
   );
 
-  static const dark = AppPalette(
+  static const classicDark = AppPalette(
     brightness: Brightness.dark,
     canvas: Color(0xFF1B1A18),
     surface: Color(0xFF252320),
@@ -78,11 +90,47 @@ class AppPalette {
     textMuted: Color(0xFFA39E94),
   );
 
+  /// Mint Liquid Glass. The canvas is transparent so the backdrop gradient
+  /// shows through; cards and the tab bar frost it themselves.
+  static const glassLight = AppPalette(
+    brightness: Brightness.light,
+    canvas: Color(0x00000000),
+    surface: Color(0xF2FFFFFF),
+    surfaceMuted: Color(0xFFE5F4EE),
+    border: Color(0x99FFFFFF),
+    shadow: Color(0x14102824),
+    // Deepened so white-on-accent stays around WCAG AA.
+    accent: Color(0xFF0C8F6A),
+    onAccent: Color(0xFFFFFFFF),
+    carbsColor: Color(0xFFC9841A),
+    fatColor: Color(0xFFD4654C),
+    proteinColor: Color(0xFF14988A),
+    textStrong: Color(0xFF163028),
+    textMuted: Color(0xFF4E675E),
+  );
+
+  static const glassDark = AppPalette(
+    brightness: Brightness.dark,
+    canvas: Color(0x00000000),
+    surface: Color(0xF01A2622),
+    surfaceMuted: Color(0xFF24332E),
+    border: Color(0x33FFFFFF),
+    shadow: Color(0x66000000),
+    accent: Color(0xFF3DDCB0),
+    onAccent: Color(0xFF06281A),
+    carbsColor: Color(0xFFF2B45A),
+    fatColor: Color(0xFFFF937B),
+    proteinColor: Color(0xFF49C9B8),
+    textStrong: Color(0xFFE7F3EE),
+    textMuted: Color(0xFFA3B5AE),
+  );
+
   /// Returns a copy with the accent swapped for [newAccent] (accent picker or a
   /// harmonized Material You primary). The neutral canvas, surfaces and macro
   /// colours are untouched, so only the one vivid role follows the user.
   AppPalette withAccent(Color newAccent) {
-    final onNew = ThemeData.estimateBrightnessForColor(newAccent) == Brightness.dark
+    final onNew =
+        ThemeData.estimateBrightnessForColor(newAccent) == Brightness.dark
         ? Colors.white
         : const Color(0xFF20201C);
     return AppPalette(
@@ -103,32 +151,36 @@ class AppPalette {
   }
 
   ColorScheme get colorScheme => ColorScheme(
-        brightness: brightness,
-        primary: accent,
-        onPrimary: onAccent,
-        primaryContainer: accent,
-        onPrimaryContainer: onAccent,
-        secondary: proteinColor,
-        onSecondary: onAccent,
-        secondaryContainer: surfaceMuted,
-        onSecondaryContainer: textStrong,
-        tertiary: carbsColor,
-        onTertiary: onAccent,
-        tertiaryContainer: surfaceMuted,
-        onTertiaryContainer: textStrong,
-        error: brightness == Brightness.light ? const Color(0xFFC4453A) : const Color(0xFFFFB4AB),
-        onError: brightness == Brightness.light ? Colors.white : const Color(0xFF690005),
-        surface: surface,
-        onSurface: textStrong,
-        surfaceContainerLowest: canvas,
-        surfaceContainerLow: canvas,
-        surfaceContainer: surfaceMuted,
-        surfaceContainerHigh: surfaceMuted,
-        surfaceContainerHighest: surfaceMuted,
-        onSurfaceVariant: textMuted,
-        outline: border,
-        outlineVariant: border,
-        surfaceTint: Colors.transparent,
-        shadow: shadow,
-      );
+    brightness: brightness,
+    primary: accent,
+    onPrimary: onAccent,
+    primaryContainer: accent,
+    onPrimaryContainer: onAccent,
+    secondary: proteinColor,
+    onSecondary: onAccent,
+    secondaryContainer: surfaceMuted,
+    onSecondaryContainer: textStrong,
+    tertiary: carbsColor,
+    onTertiary: onAccent,
+    tertiaryContainer: surfaceMuted,
+    onTertiaryContainer: textStrong,
+    error: brightness == Brightness.light
+        ? const Color(0xFFC4453A)
+        : const Color(0xFFFFB4AB),
+    onError: brightness == Brightness.light
+        ? Colors.white
+        : const Color(0xFF690005),
+    surface: surface,
+    onSurface: textStrong,
+    surfaceContainerLowest: canvas,
+    surfaceContainerLow: canvas,
+    surfaceContainer: surfaceMuted,
+    surfaceContainerHigh: surfaceMuted,
+    surfaceContainerHighest: surfaceMuted,
+    onSurfaceVariant: textMuted,
+    outline: border,
+    outlineVariant: border,
+    surfaceTint: Colors.transparent,
+    shadow: shadow,
+  );
 }

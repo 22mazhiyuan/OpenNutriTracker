@@ -24,9 +24,14 @@
 
          READ_BODY_FAT personalised the workout calorie-credit suggestion.
          That suggestion falls back to a BMI-derived percentile, which is what
-         Android now uses; iOS still reads body fat from HealthKit. -->
+         Android now uses; iOS still reads body fat from HealthKit.
+
+         READ_STEPS is declared because the home screen shows today's step
+         count. It is requested on its own, only after the user turns that
+         card on, and is not part of the workout-import permission set. -->
     <uses-permission android:name="android.permission.health.READ_EXERCISE"/>
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED"/>
+    <uses-permission android:name="android.permission.health.READ_STEPS"/>
 
     <!-- Provide required visibility configuration for API level 30 and above -->
     <queries>

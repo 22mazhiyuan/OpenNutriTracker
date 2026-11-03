@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:opennutritracker/core/data/repository/config_repository.dart';
+import 'package:opennutritracker/core/domain/entity/body_measurement_entity.dart';
+import 'package:opennutritracker/core/domain/entity/body_metric.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/core/domain/entity/weight_log_entity.dart';
+import 'package:opennutritracker/core/domain/usecase/add_body_measurement_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/add_weight_log_usecase.dart';
+import 'package:opennutritracker/core/domain/usecase/delete_body_measurement_usecase.dart';
+import 'package:opennutritracker/core/domain/usecase/get_body_measurements_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/delete_weight_log_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_user_usecase.dart';
 import 'package:opennutritracker/core/domain/usecase/get_weight_log_usecase.dart';
@@ -12,6 +17,7 @@ import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/core/utils/reload_diary_and_trends.dart';
 import 'package:opennutritracker/features/profile/presentation/utils/profile_display_format.dart';
 import 'package:opennutritracker/features/profile/presentation/widgets/body_weight_input.dart';
+import 'package:opennutritracker/features/profile/presentation/widgets/metric_trend_chart.dart';
 import 'package:opennutritracker/features/profile/presentation/widgets/weight_trend_chart.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
@@ -32,6 +38,9 @@ class WeightHistoryScreen extends StatefulWidget {
   final DeleteWeightLogUsecase? deleteUsecase;
   final ConfigRepository? configRepository;
   final GetUserUsecase? getUserUsecase;
+  final GetBodyMeasurementsUsecase? getMeasurementsUsecase;
+  final AddBodyMeasurementUsecase? addMeasurementUsecase;
+  final DeleteBodyMeasurementUsecase? deleteMeasurementUsecase;
 
   const WeightHistoryScreen({
     super.key,
@@ -40,6 +49,9 @@ class WeightHistoryScreen extends StatefulWidget {
     this.deleteUsecase,
     this.configRepository,
     this.getUserUsecase,
+    this.getMeasurementsUsecase,
+    this.addMeasurementUsecase,
+    this.deleteMeasurementUsecase,
   });
 
   @override
@@ -72,6 +84,8 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
   // The profile's current weight, which Add entry starts from (#1367).
   double? _profileWeightKg;
   _ChartRange _selectedRange = _ChartRange.days30;
+  BodyMetric? _bodyMetric;
+  List<BodyMeasurementEntity> _measurements = const [];
 
   @override
   void initState() {
@@ -109,15 +123,18 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
       case _ChartRange.all:
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
-        final nonFutureEntries = _entries
-            .where((e) => !e.date.isAfter(today))
+        final sourceDates = _bodyMetric == null
+            ? _entries.map((e) => e.date)
+            : _measurements.map((e) => e.date);
+        final nonFutureEntries = sourceDates
+            .where((date) => !date.isAfter(today))
             .toList();
         if (nonFutureEntries.isEmpty) {
           return 30;
         }
-        final oldestDate = nonFutureEntries
-            .map((e) => e.date)
-            .reduce((a, b) => a.isBefore(b) ? a : b);
+        final oldestDate = nonFutureEntries.reduce(
+          (a, b) => a.isBefore(b) ? a : b,
+        );
         // Calendar days, not elapsed 24-hour spans: across a spring-forward
         // `difference().inDays` comes out one short and the chart window
         // would start the day after the oldest entry (#1207).
@@ -141,21 +158,21 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               segments: [
-                const ButtonSegment(
+                ButtonSegment(
                   value: _ChartRange.days30,
-                  label: Text('30d'),
+                  label: Text(S.of(context).chartRangeDaysLabel(30)),
                 ),
-                const ButtonSegment(
+                ButtonSegment(
                   value: _ChartRange.days60,
-                  label: Text('60d'),
+                  label: Text(S.of(context).chartRangeDaysLabel(60)),
                 ),
-                const ButtonSegment(
+                ButtonSegment(
                   value: _ChartRange.days180,
-                  label: Text('180d'),
+                  label: Text(S.of(context).chartRangeDaysLabel(180)),
                 ),
-                const ButtonSegment(
+                ButtonSegment(
                   value: _ChartRange.days365,
-                  label: Text('365d'),
+                  label: Text(S.of(context).chartRangeDaysLabel(365)),
                 ),
                 ButtonSegment(
                   value: _ChartRange.all,
@@ -182,51 +199,227 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
       floatingActionButton: Semantics(
         identifier: 'weight-history-add',
         child: FloatingActionButton.extended(
-          onPressed: _onAddEntry,
+          onPressed: _bodyMetric == null ? _onAddEntry : _onAddMeasurement,
           icon: const Icon(Icons.add),
           label: Text(S.of(context).weightHistoryAddEntry),
         ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : _entries.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Text(
-                  S.of(context).weightHistoryNoEntries,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
+          : Column(
+              children: [
+                _buildMetricSelector(),
+                Expanded(
+                  child: _bodyMetric == null
+                      ? _weightBody()
+                      : _measurementBody(),
                 ),
-              ),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.only(top: 8, bottom: 96),
-              itemCount: _entries.length + 1,
-              separatorBuilder: (context, index) {
-                // No divider between the chart card and the first list tile.
-                if (index == 0) return const SizedBox.shrink();
-                return const Divider(height: 1);
-              },
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildRangeSelector(),
-                      WeightTrendChart(
-                        entries: _entries,
-                        bodyWeightUnit: _bodyWeightUnit,
-                        targetWeightKg: _targetWeightKg,
-                        windowDays: _calculateWindowDays(),
-                      ),
-                    ],
-                  );
-                }
-                return _buildEntryTile(_entries[index - 1]);
-              },
+              ],
             ),
     );
+  }
+
+  Widget _weightBody() {
+    if (_entries.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Text(
+            S.of(context).weightHistoryNoEntries,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.only(top: 8, bottom: 96),
+      itemCount: _entries.length + 1,
+      separatorBuilder: (context, index) {
+        // No divider between the chart card and the first list tile.
+        if (index == 0) return const SizedBox.shrink();
+        return const Divider(height: 1);
+      },
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildRangeSelector(),
+              WeightTrendChart(
+                entries: _entries,
+                bodyWeightUnit: _bodyWeightUnit,
+                targetWeightKg: _targetWeightKg,
+                windowDays: _calculateWindowDays(),
+              ),
+            ],
+          );
+        }
+        return _buildEntryTile(_entries[index - 1]);
+      },
+    );
+  }
+
+  Widget _buildMetricSelector() {
+    final s = S.of(context);
+    final metrics = <BodyMetric?>[null, ...BodyMetric.values];
+    return SizedBox(
+      height: 52,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: metrics.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final metric = metrics[index];
+          final selected = metric == _bodyMetric;
+          final id = metric == null ? 'weight' : metric.name;
+          return Semantics(
+            identifier: 'body-metric-$id',
+            child: ChoiceChip(
+              label: Text(_metricLabel(s, metric)),
+              selected: selected,
+              onSelected: (_) => _selectMetric(metric),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String _metricLabel(S s, BodyMetric? metric) {
+    return switch (metric) {
+      null => s.bodyMetricWeight,
+      BodyMetric.bodyFat => s.bodyMetricBodyFat,
+      BodyMetric.waist => s.bodyMetricWaist,
+      BodyMetric.hip => s.bodyMetricHip,
+      BodyMetric.chest => s.bodyMetricChest,
+      BodyMetric.thigh => s.bodyMetricThigh,
+      BodyMetric.arm => s.bodyMetricArm,
+      BodyMetric.calf => s.bodyMetricCalf,
+    };
+  }
+
+  String _metricUnit(S s, BodyMetric metric) =>
+      metric.isPercent ? s.bodyMetricPercentUnit : s.bodyMetricCmUnit;
+
+  Future<void> _selectMetric(BodyMetric? metric) async {
+    setState(() => _bodyMetric = metric);
+    if (metric != null) await _loadMeasurements();
+  }
+
+  GetBodyMeasurementsUsecase? get _getMeasurements {
+    if (widget.getMeasurementsUsecase != null) {
+      return widget.getMeasurementsUsecase;
+    }
+    if (locator.isRegistered<GetBodyMeasurementsUsecase>()) {
+      return locator<GetBodyMeasurementsUsecase>();
+    }
+    return null;
+  }
+
+  Future<void> _loadMeasurements() async {
+    final metric = _bodyMetric;
+    final usecase = _getMeasurements;
+    if (metric == null || usecase == null) {
+      if (mounted) setState(() => _measurements = const []);
+      return;
+    }
+    final all = await usecase.getAll();
+    if (!mounted || _bodyMetric != metric) return;
+    final rows = all.where((e) => e.metric == metric).toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    setState(() => _measurements = rows);
+  }
+
+  Widget _measurementBody() {
+    final metric = _bodyMetric;
+    if (metric == null) return const SizedBox.shrink();
+    final s = S.of(context);
+    final unit = _metricUnit(s, metric);
+    if (_measurements.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            s.bodyMetricEmpty(_metricLabel(s, metric)),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.only(bottom: 96),
+      itemCount: _measurements.length + 1,
+      separatorBuilder: (context, index) =>
+          index == 0 ? const SizedBox.shrink() : const Divider(height: 1),
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Column(
+            children: [
+              _buildRangeSelector(),
+              MetricTrendChart(
+                dates: _measurements.map((e) => e.date).toList(),
+                values: _measurements.map((e) => e.value).toList(),
+                windowDays: _calculateWindowDays(),
+                unitLabel: unit,
+              ),
+            ],
+          );
+        }
+        final entry = _measurements[index - 1];
+        final dateLabel = DateFormat.yMMMd(
+          Localizations.localeOf(context).toLanguageTag(),
+        ).format(entry.date);
+        final number = entry.value.toStringAsFixed(
+          entry.value == entry.value.roundToDouble() ? 0 : 1,
+        );
+        return ListTile(
+          title: Text('$number $unit'),
+          subtitle: Text(dateLabel),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _onDeleteMeasurement(entry),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onAddMeasurement() async {
+    final metric = _bodyMetric;
+    if (metric == null) return;
+    final result = await showDialog<_NewMeasurement>(
+      context: context,
+      builder: (context) => _AddMeasurementDialog(metric: metric),
+    );
+    if (result == null) return;
+    final usecase =
+        widget.addMeasurementUsecase ??
+        (locator.isRegistered<AddBodyMeasurementUsecase>()
+            ? locator<AddBodyMeasurementUsecase>()
+            : null);
+    if (usecase == null) return;
+    await usecase.add(
+      BodyMeasurementEntity(
+        date: DateTime(result.date.year, result.date.month, result.date.day),
+        metric: metric,
+        value: result.value,
+      ),
+    );
+    await _loadMeasurements();
+  }
+
+  Future<void> _onDeleteMeasurement(BodyMeasurementEntity entry) async {
+    final usecase =
+        widget.deleteMeasurementUsecase ??
+        (locator.isRegistered<DeleteBodyMeasurementUsecase>()
+            ? locator<DeleteBodyMeasurementUsecase>()
+            : null);
+    if (usecase == null) return;
+    await usecase.delete(entry.date, entry.metric);
+    await _loadMeasurements();
   }
 
   Widget _buildEntryTile(WeightLogEntity entry) {
@@ -414,3 +607,116 @@ class _AddWeightEntryDialogState extends State<_AddWeightEntryDialog> {
 }
 
 enum _ChartRange { days30, days60, days180, days365, all }
+
+class _NewMeasurement {
+  final DateTime date;
+  final double value;
+
+  _NewMeasurement({required this.date, required this.value});
+}
+
+class _AddMeasurementDialog extends StatefulWidget {
+  final BodyMetric metric;
+
+  const _AddMeasurementDialog({required this.metric});
+
+  @override
+  State<_AddMeasurementDialog> createState() => _AddMeasurementDialogState();
+}
+
+class _AddMeasurementDialogState extends State<_AddMeasurementDialog> {
+  late DateTime _date;
+  late final TextEditingController _valueController;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = DateTime.now();
+    _valueController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
+  void _submit() {
+    final parsed = double.tryParse(
+      _valueController.text.trim().replaceAll(',', '.'),
+    );
+    if (parsed == null || !widget.metric.accepts(parsed)) {
+      setState(() => _error = S.of(context).bodyMetricInvalid);
+      return;
+    }
+    Navigator.of(context).pop(_NewMeasurement(date: _date, value: parsed));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final label = switch (widget.metric) {
+      BodyMetric.bodyFat => s.bodyMetricBodyFat,
+      BodyMetric.waist => s.bodyMetricWaist,
+      BodyMetric.hip => s.bodyMetricHip,
+      BodyMetric.chest => s.bodyMetricChest,
+      BodyMetric.thigh => s.bodyMetricThigh,
+      BodyMetric.arm => s.bodyMetricArm,
+      BodyMetric.calf => s.bodyMetricCalf,
+    };
+    final unit = widget.metric.isPercent
+        ? s.bodyMetricPercentUnit
+        : s.bodyMetricCmUnit;
+    final dateLabel = DateFormat.yMMMd(
+      Localizations.localeOf(context).toLanguageTag(),
+    ).format(_date);
+    return AlertDialog(
+      title: Text(s.bodyMetricAddTitle(label)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.event_outlined),
+            title: Text(s.weightHistoryDateLabel),
+            subtitle: Text(dateLabel),
+            onTap: _pickDate,
+          ),
+          Semantics(
+            identifier: 'body-metric-value',
+            child: TextField(
+              controller: _valueController,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText: s.bodyMetricValueLabel,
+                suffixText: unit,
+                errorText: _error,
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(s.dialogCancelLabel),
+        ),
+        TextButton(onPressed: _submit, child: Text(s.dialogOKLabel)),
+      ],
+    );
+  }
+}

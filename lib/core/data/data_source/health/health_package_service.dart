@@ -333,4 +333,66 @@ class HealthPackageService implements HealthService {
   /// as-is. No living adult is under 1% body fat, so a value at or below 1 is
   /// unambiguously the fractional spelling.
   double _bodyFatAsPercent(double raw) => raw <= 1 ? raw * 100 : raw;
+
+  static const _stepsType = HealthDataType.STEPS;
+
+  @override
+  Future<bool> requestStepPermission() async {
+    if (_platform == HealthTargetPlatform.unsupported) return false;
+    return _health.requestAuthorization(
+      const [_stepsType],
+      permissions: const [HealthDataAccess.READ],
+    );
+  }
+
+  @override
+  Future<StepReadResult> readTodaySteps() async {
+    if (_platform == HealthTargetPlatform.unsupported) {
+      return StepReadResult.unavailable;
+    }
+    final granted = await _health.hasPermissions(
+      const [_stepsType],
+      permissions: const [HealthDataAccess.READ],
+    );
+    if (granted == false) return StepReadResult.unavailable;
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    try {
+      final total = await _health.getTotalStepsInInterval(start, now);
+      if (total != null) {
+        return StepReadResult(permitted: true, steps: total);
+      }
+      final points = await _health.getHealthDataFromTypes(
+        types: const [_stepsType],
+        startTime: start,
+        endTime: now,
+      );
+      return StepReadResult(permitted: true, steps: sumStepCount(points));
+    } catch (error, stackTrace) {
+      _log.warning('Could not read steps', error, stackTrace);
+      return StepReadResult.unavailable;
+    }
+  }
+
+  /// Largest single-source total. A phone and a watch often both record the
+  /// same walk; summing every source double-counts it.
+  @visibleForTesting
+  static int sumStepCount(Iterable<HealthDataPoint> points) {
+    final bySource = <String, int>{};
+    final seen = <String>{};
+    for (final point in points) {
+      if (point.uuid.isNotEmpty && !seen.add(point.uuid)) continue;
+      final value = point.value;
+      if (value is! NumericHealthValue) continue;
+      final steps = value.numericValue.round();
+      if (steps <= 0) continue;
+      bySource.update(
+        point.sourceName,
+        (sum) => sum + steps,
+        ifAbsent: () => steps,
+      );
+    }
+    if (bySource.isEmpty) return 0;
+    return bySource.values.reduce(max);
+  }
 }

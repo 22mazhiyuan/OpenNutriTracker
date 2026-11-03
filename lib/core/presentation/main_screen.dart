@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:opennutritracker/core/domain/usecase/get_config_usecase.dart';
 import 'package:opennutritracker/core/presentation/widgets/add_item_bottom_sheet.dart';
+import 'package:opennutritracker/core/presentation/widgets/glass_surface.dart';
+import 'package:opennutritracker/core/styles/dimens.dart';
 import 'package:opennutritracker/core/presentation/widgets/demo_mode_banner.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/utils/health_rationale_service.dart';
@@ -120,7 +122,53 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final palette = isDark ? AppPalette.dark : AppPalette.light;
+    final glass = AppPalette.glassActive;
+    final nav = <Widget>[
+      _NavItem(
+        id: 'nav-home',
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home_rounded,
+        label: S.of(context).homeLabel,
+        index: 0,
+        selectedIndex: _selectedPageIndex,
+        palette: palette,
+        onTap: _setPage,
+      ),
+      _NavItem(
+        id: 'nav-diary',
+        icon: Icons.book_outlined,
+        selectedIcon: Icons.book_rounded,
+        label: S.of(context).diaryLabel,
+        index: 1,
+        selectedIndex: _selectedPageIndex,
+        palette: palette,
+        onTap: _setPage,
+      ),
+      const SizedBox(width: 64),
+      _NavItem(
+        id: 'nav-trends',
+        icon: Icons.insights_outlined,
+        selectedIcon: Icons.insights_rounded,
+        label: S.of(context).trendsLabel,
+        index: 2,
+        selectedIndex: _selectedPageIndex,
+        palette: palette,
+        onTap: _setPage,
+      ),
+      _NavItem(
+        id: 'nav-you',
+        icon: Icons.account_circle_outlined,
+        selectedIcon: Icons.account_circle_rounded,
+        label: S.of(context).youLabel,
+        index: 3,
+        selectedIndex: _selectedPageIndex,
+        palette: palette,
+        onTap: _setPage,
+      ),
+    ];
     return Scaffold(
+      extendBody: glass,
+      backgroundColor: glass ? Colors.transparent : null,
       appBar: _appbarPages[_selectedPageIndex],
       body: Column(
         children: [
@@ -133,69 +181,33 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      floatingActionButton: Semantics(
-        identifier: 'fab-add-item',
-        child: FloatingActionButton(
-          onPressed: () => _onFabPressed(context),
-          tooltip: S.of(context).addLabel,
-          child: const Icon(Icons.add, size: 30),
-        ),
-      ),
+      floatingActionButton: glass
+          ? null
+          : Semantics(
+              identifier: 'fab-add-item',
+              child: FloatingActionButton(
+                onPressed: () => _onFabPressed(context),
+                tooltip: S.of(context).addLabel,
+                child: const Icon(Icons.add, size: 30),
+              ),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: palette.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        height: 78,
-        padding: EdgeInsets.zero,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: Row(
-          children: [
-            _NavItem(
-              id: 'nav-home',
-              icon: Icons.home_outlined,
-              selectedIcon: Icons.home_rounded,
-              label: S.of(context).homeLabel,
-              index: 0,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
+      bottomNavigationBar: glass
+          ? _GlassTabBar(
+              onAdd: () => _onFabPressed(context),
+              addLabel: S.of(context).addLabel,
+              children: nav,
+            )
+          : BottomAppBar(
+              color: palette.surface,
+              surfaceTintColor: Colors.transparent,
+              elevation: 0,
+              height: 78,
+              padding: EdgeInsets.zero,
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 8,
+              child: Row(children: nav),
             ),
-            _NavItem(
-              id: 'nav-diary',
-              icon: Icons.book_outlined,
-              selectedIcon: Icons.book_rounded,
-              label: S.of(context).diaryLabel,
-              index: 1,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
-            ),
-            const SizedBox(width: 64), // notch gap for the centre Add FAB
-            _NavItem(
-              id: 'nav-trends',
-              icon: Icons.insights_outlined,
-              selectedIcon: Icons.insights_rounded,
-              label: S.of(context).trendsLabel,
-              index: 2,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
-            ),
-            _NavItem(
-              id: 'nav-you',
-              icon: Icons.account_circle_outlined,
-              selectedIcon: Icons.account_circle_rounded,
-              label: S.of(context).youLabel,
-              index: 3,
-              selectedIndex: _selectedPageIndex,
-              palette: palette,
-              onTap: _setPage,
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -222,6 +234,54 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         );
       },
+    );
+  }
+}
+
+class _GlassTabBar extends StatelessWidget {
+  final VoidCallback onAdd;
+  final String addLabel;
+  final List<Widget> children;
+
+  const _GlassTabBar({
+    required this.onAdd,
+    required this.addLabel,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        height: 96,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 28, 16, 10),
+              child: GlassSurface(
+                borderRadius: 32,
+                child: SizedBox(height: 58, child: Row(children: children)),
+              ),
+            ),
+            Positioned(
+              top: 0,
+              child: Semantics(
+                identifier: 'fab-add-item',
+                child: FloatingActionButton(
+                  onPressed: onAdd,
+                  tooltip: addLabel,
+                  elevation: 0,
+                  backgroundColor: accent,
+                  child: const Icon(Icons.add, size: 30),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -264,7 +324,16 @@ class _NavItem extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(selected ? selectedIcon : icon, color: color, size: 26),
+                AnimatedScale(
+                  scale: selected ? 1.08 : 1,
+                  duration: AppMotion.durationShort,
+                  curve: AppMotion.emphasized,
+                  child: Icon(
+                    (selected && !AppPalette.glassActive) ? selectedIcon : icon,
+                    color: color,
+                    size: 26,
+                  ),
+                ),
                 const SizedBox(height: 3),
                 Text(
                   label,

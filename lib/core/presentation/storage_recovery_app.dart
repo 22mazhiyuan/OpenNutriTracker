@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:opennutritracker/generated/l10n.dart';
 
 class StorageRecoveryApp extends StatelessWidget {
   const StorageRecoveryApp({
@@ -14,6 +16,14 @@ class StorageRecoveryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: const Locale('zh'),
+      supportedLocales: S.supportedLocales,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: _StorageRecoveryScreen(errorCode: errorCode, onRetry: onRetry),
     );
   }
@@ -47,6 +57,7 @@ class _StorageRecoveryScreenState extends State<_StorageRecoveryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -58,25 +69,21 @@ class _StorageRecoveryScreenState extends State<_StorageRecoveryScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.storage_rounded,
+                    Icons.storage_outlined,
                     size: 64,
                     color: Theme.of(context).colorScheme.error,
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Your local data could not be opened safely',
+                    s.storageRecoveryTitle,
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Your data files have not been changed. Try again. If the problem persists, '
-                    'contact support before clearing the app data or reinstalling.',
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(s.storageRecoveryBody, textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   Text(
-                    'Error code: ${widget.errorCode}',
+                    s.storageRecoveryErrorCode(widget.errorCode),
                     style: Theme.of(context).textTheme.bodySmall,
                     textAlign: TextAlign.center,
                   ),
@@ -90,8 +97,8 @@ class _StorageRecoveryScreenState extends State<_StorageRecoveryScreen> {
                               dimension: 18,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.refresh_rounded),
-                      label: const Text('Retry'),
+                          : const Icon(Icons.refresh_outlined),
+                      label: Text(s.storageRecoveryRetry),
                     ),
                   ),
                 ],

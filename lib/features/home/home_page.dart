@@ -28,6 +28,7 @@ import 'package:opennutritracker/features/home/presentation/widgets/dashboard_wi
 import 'package:opennutritracker/features/home/presentation/widgets/intake_vertical_list.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/fasting_home_chip.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/quick_water_widget.dart';
+import 'package:opennutritracker/features/home/presentation/widgets/steps_home_card.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/quick_weight_widget.dart';
 import 'package:opennutritracker/generated/l10n.dart';
@@ -184,14 +185,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
               // Wrap rather than Row so the two chips drop onto a second line
               // at large text scale instead of overflowing off the edge.
-              child: Wrap(
-                spacing: Dimens.spacing12,
-                runSpacing: Dimens.spacing8,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  QuickWeightWidget(
-                    weightKg: userWeightKg,
-                    bodyWeightUnit: bodyWeightUnit,
+                  Row(
+                    children: [
+                      QuickWeightWidget(
+                        weightKg: userWeightKg,
+                        bodyWeightUnit: bodyWeightUnit,
+                      ),
+                      const SizedBox(width: Dimens.spacing12),
+                      const Expanded(child: StepsHomeCard()),
+                    ],
                   ),
+                  const SizedBox(height: Dimens.spacing12),
                   QuickWaterWidget(
                     waterMlToday: waterMlToday,
                     waterGoalMl: waterGoalMl,

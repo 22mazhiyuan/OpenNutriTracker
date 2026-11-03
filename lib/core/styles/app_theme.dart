@@ -9,7 +9,13 @@ import 'package:opennutritracker/core/styles/dimens.dart';
 TextTheme appTextTheme(AppPalette p) {
   const f = 'Nunito';
   TextStyle s(double size, FontWeight w, {double spacing = 0, Color? color}) =>
-      TextStyle(fontFamily: f, fontSize: size, fontWeight: w, letterSpacing: spacing, color: color ?? p.textStrong);
+      TextStyle(
+        fontFamily: f,
+        fontSize: size,
+        fontWeight: w,
+        letterSpacing: spacing,
+        color: color ?? p.textStrong,
+      );
   return TextTheme(
     displayLarge: s(57, FontWeight.w800, spacing: -1),
     displayMedium: s(45, FontWeight.w800, spacing: -0.5),
@@ -32,14 +38,14 @@ TextTheme appTextTheme(AppPalette p) {
 /// Builds the friendly-flat [ThemeData] for a palette. Component themes carry
 /// the rounded shapes and flat surfaces so the look propagates app-wide; depth
 /// lives in the [AppCard] widget rather than in heavy elevation here.
-ThemeData buildAppTheme(AppPalette p) {
+ThemeData buildAppTheme(AppPalette p, {bool glass = false}) {
   final scheme = p.colorScheme;
   final text = appTextTheme(p);
   const pill = StadiumBorder();
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: p.canvas,
+    scaffoldBackgroundColor: glass ? Colors.transparent : p.canvas,
     textTheme: text,
     splashFactory: InkSparkle.splashFactory,
     cardTheme: CardThemeData(
@@ -53,12 +59,12 @@ ThemeData buildAppTheme(AppPalette p) {
       margin: EdgeInsets.zero,
     ),
     appBarTheme: AppBarThemeData(
-      backgroundColor: p.canvas,
+      backgroundColor: glass ? Colors.transparent : p.canvas,
       surfaceTintColor: Colors.transparent,
       foregroundColor: p.textStrong,
       elevation: 0,
       scrolledUnderElevation: 0,
-      centerTitle: false,
+      centerTitle: glass,
       titleTextStyle: text.headlineSmall,
     ),
     navigationBarTheme: NavigationBarThemeData(
@@ -76,7 +82,9 @@ ThemeData buildAppTheme(AppPalette p) {
       focusElevation: 0,
       hoverElevation: 0,
       highlightElevation: 0,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(22))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(22)),
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -98,9 +106,18 @@ ThemeData buildAppTheme(AppPalette p) {
     inputDecorationTheme: InputDecorationThemeData(
       filled: true,
       fillColor: p.surfaceMuted,
-      contentPadding: const EdgeInsets.symmetric(horizontal: Dimens.spacing16, vertical: Dimens.spacing12),
-      border: const OutlineInputBorder(borderRadius: Dimens.borderRadiusM, borderSide: BorderSide.none),
-      enabledBorder: const OutlineInputBorder(borderRadius: Dimens.borderRadiusM, borderSide: BorderSide.none),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: Dimens.spacing16,
+        vertical: Dimens.spacing12,
+      ),
+      border: const OutlineInputBorder(
+        borderRadius: Dimens.borderRadiusM,
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: const OutlineInputBorder(
+        borderRadius: Dimens.borderRadiusM,
+        borderSide: BorderSide.none,
+      ),
       focusedBorder: OutlineInputBorder(
         borderRadius: Dimens.borderRadiusM,
         borderSide: BorderSide(color: p.accent, width: 2),
@@ -112,16 +129,29 @@ ThemeData buildAppTheme(AppPalette p) {
       side: BorderSide.none,
     ),
     dialogTheme: DialogThemeData(
-      backgroundColor: p.surface,
+      backgroundColor: glass
+          ? (p.brightness == Brightness.dark
+                ? const Color(0xE61A2622)
+                : const Color(0xF2FFFFFF))
+          : p.surface,
       surfaceTintColor: Colors.transparent,
+      elevation: glass ? 0 : null,
       shape: const RoundedRectangleBorder(borderRadius: Dimens.borderRadiusL),
     ),
-    listTileTheme: const ListTileThemeData(shape: RoundedRectangleBorder(borderRadius: Dimens.borderRadiusM)),
+    listTileTheme: const ListTileThemeData(
+      shape: RoundedRectangleBorder(borderRadius: Dimens.borderRadiusM),
+    ),
     bottomSheetTheme: BottomSheetThemeData(
-      backgroundColor: p.surface,
+      backgroundColor: glass
+          ? (p.brightness == Brightness.dark
+                ? const Color(0xF01A2622)
+                : const Color(0xF7FFFFFF))
+          : p.surface,
       surfaceTintColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(Dimens.radiusXL)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(Dimens.radiusXL),
+        ),
       ),
     ),
     pageTransitionsTheme: const PageTransitionsTheme(

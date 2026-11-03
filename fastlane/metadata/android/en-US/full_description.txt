@@ -1,21 +1,13 @@
-OpenNutriTracker is a calorie counter and food diary with no account, no subscription and no ads — for losing weight or keeping a balanced diet. Open source, and your diary stays on your device.
+轻卡记是一款免费的减肥与饮食记录应用：没有账号、没有订阅、没有广告。日记、体重、围度和喝水记录都加密保存在这台设备上。
 
 
-🚫💰 No subscriptions, purchases or ads.
-🔒 Privacy first: No account, no sign-in, no analytics, no ads. Your diary, profile, weight, custom meals and recipes are stored on your device in AES-256 encrypted databases; photos you attach are ordinary image files beside them. Food search sends the search term; AI meal assistance sends the line you type or the photo you take, plus the model name, to the provider you chose — never your diary or history. Both also send your language code. Crash reporting is opt-in.
-🍎 Nutritional tracking: Log meals and snacks against a large food database — Open Food Facts plus a reference backend covering USDA FoodData Central and the German BLS, selectable in Settings. Search, scan, or enter a number when you already know the calorie cost.
-📓 Food diary: A calendar-driven diary split into Breakfast, Lunch, Dinner and Snack, with per-meal kcal targets (several presets or a custom share), drag-to-rearrange between meals, and sort by time or macro contribution.
-📈 Trends: Current and best day-streak, calories against your goal line, daily macro averages, water intake, and weight against target. Switch between 7, 30 and 90 days, or up to ten years.
-🥕 Micronutrient panel: Day and week views for fibre, sodium, saturated fat, sugar, calcium, iron, potassium, vitamin D, vitamin B12 and magnesium, with optional Dietary Reference Intake bars.
-🍽️ Custom meals & recipes: Build a one-off custom meal with photo, brand and barcode, or a reusable recipe with a photo. The recipe builder has its own ingredient picker with barcode scanning.
-⚡ Quick add: Skip the search when you already know roughly how much you ate — a title plus kcal (and optional macros), logged straight to the meal.
-🤖 AI meal assistance (experimental, off by default): Describe a meal in one line, or photograph it, and have several items resolved at once. Needs your own API key (Anthropic, OpenAI, OpenRouter) or a server you run — the project never sees either. The model reads language, not nutrition: every calorie still comes from the food databases.
-📷 Barcode scanner: Scan packaged items for instant lookup, paste a barcode manually, or attach a barcode to a custom meal so future scans recognise your own foods.
-🏃 Activities and workout import: Log workouts from a categorised catalogue or define custom activities with direct kcal entry and templates. Optionally import finished workouts from Health Connect — read-only, off by default, nothing is written back, and they stay on your device.
-💧 Water tracker: A water chip on the home screen with quick-add increments, an editable goal, and undo for the last entry.
-⏱️ Fasting timer: Optional intermittent-fasting timer with a content-warning gate, a home chip showing time remaining, and a completion notification.
-⚖️ Weight history: Capture weight during onboarding and on demand, see the trend against your target, and optionally taper the calorie goal as you approach it.
-🎨 Material You & themes: Adopt the system accent colour on Android 12+, or pick from sixteen built-in presets.
-🔢 kcal or kJ: Switch the energy unit globally; every diary entry, target, and chart reflects the choice.
-📤 Export & import: Export diary entries, activities and tracked days as a JSON zip you can re-import, or as flat CSVs. Recipes and weight log are JSON only. Paste a JSON blob to import meals, or share a meal or activity as a QR code. Your profile, custom meals, water and fasting history stay out of the bundle.
-⚕️ Not a medical device: OpenNutriTracker is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. Figures are estimates from public databases and published equations. Always consult a healthcare professional for medical advice, diagnosis, or treatment.
+不订阅、不内购、不插广告。
+隐私优先：不注册、不登录、不分析用户行为。日记、资料、体重、围度、自定义餐食和食谱保存在本机的加密数据库里。搜索食物时只会发送搜索词。AI 记录默认关闭，只有你自己填写服务地址后才会把当次文字或照片发给你选择的服务，不会上传整本日记。
+饮食记录：搜索或扫描条码，记录早餐、午餐、晚餐和加餐，并看到每餐的热量目标。
+首页一目了然：今天还能吃多少、喝了多少水、走了多少步。喝水可以一键加上一杯。
+身体数据：体重、体脂率、腰围、臀围、胸围、大腿围、手臂围和小腿围，各自有趋势图。
+运动：从目录记录活动，或在你同意后只读导入已完成的锻炼。步数来自健康数据，不会写回去。
+外观：默认是清爽的薄荷玻璃风格，也可以换回原来的暖色主题，并保留深色模式。
+导出：可以把日记导出成压缩包，方便备份到另一台设备。资料本身不包含在导出里。
+
+本应用不是医疗器械，不用于诊断、治疗或预防任何疾病。数字来自公开食物库和已发表的估算公式。身体上的决定请咨询专业人员。

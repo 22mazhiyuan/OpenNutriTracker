@@ -21,16 +21,10 @@ void main() {
       ),
     );
 
-    expect(
-      find.text('Your local data could not be opened safely'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Error code: hive_wrong_key_or_corrupted'),
-      findsOneWidget,
-    );
+    expect(find.text('本地数据无法安全打开'), findsOneWidget);
+    expect(find.text('错误代码：hive_wrong_key_or_corrupted'), findsOneWidget);
 
-    await tester.tap(find.text('Retry'));
+    await tester.tap(find.text('重试'));
     await tester.pump();
 
     expect(retryCount, 1);

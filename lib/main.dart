@@ -8,12 +8,14 @@ import 'package:logging/logging.dart';
 import 'package:opennutritracker/core/data/data_source/remote_search_cache_data_source.dart';
 import 'package:opennutritracker/core/data/data_source/user_data_source.dart';
 import 'package:opennutritracker/core/data/repository/config_repository.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 import 'package:opennutritracker/core/domain/entity/app_theme_entity.dart';
 import 'package:opennutritracker/core/l10n/app_locales.dart';
 import 'package:opennutritracker/core/presentation/main_screen.dart';
 import 'package:opennutritracker/core/presentation/splash_screen.dart';
 import 'package:opennutritracker/core/presentation/storage_recovery_app.dart';
 import 'package:opennutritracker/core/presentation/widgets/image_full_screen.dart';
+import 'package:opennutritracker/core/presentation/widgets/glass_backdrop.dart';
 import 'package:opennutritracker/core/presentation/widgets/keyboard_dismisser.dart';
 import 'package:opennutritracker/core/styles/app_palette.dart';
 import 'package:opennutritracker/core/styles/app_theme.dart';
@@ -115,7 +117,14 @@ Future<void> _bootstrapApp() async {
     markLocaleSyncSeeded: configRepo.setLocaleSyncSeeded,
     clearLocaleSyncSeeded: configRepo.clearLocaleSyncSeeded,
   );
-  final savedLocale = localeCode != null ? Locale(localeCode) : null;
+  // The product is Simplified Chinese on every device. A system language
+  // or an older saved choice must not switch the UI, the reminders, or
+  // the food-name language away from zh.
+  if (localeCode != 'zh') {
+    await configRepo.setSelectedLocale('zh');
+  }
+  const savedLocale = Locale('zh');
+  final savedAppLook = config.appLook;
 
   // #312: Restore scheduled notifications after app start / device reboot,
   // in the user's language. Android re-applies the channel name/description
@@ -145,6 +154,7 @@ Future<void> _bootstrapApp() async {
       savedUsesKilojoules,
       savedUseMaterialYou,
       savedAccentColor,
+      savedAppLook,
     );
   } else {
     log.info('Starting App ...');
@@ -155,6 +165,7 @@ Future<void> _bootstrapApp() async {
       savedUsesKilojoules,
       savedUseMaterialYou,
       savedAccentColor,
+      savedAppLook,
     );
   }
 }
@@ -166,6 +177,7 @@ void _runAppWithSentryReporting(
   bool savedUsesKilojoules,
   bool savedUseMaterialYou,
   int? savedAccentColor,
+  AppLook savedAppLook,
 ) async {
   await SentryFlutter.init(
     (options) => configureSentryOptions(options, dsn: Env.sentryDns),
@@ -176,6 +188,7 @@ void _runAppWithSentryReporting(
       savedUsesKilojoules,
       savedUseMaterialYou,
       savedAccentColor,
+      savedAppLook,
     ),
   );
 }
@@ -187,12 +200,14 @@ void runAppWithChangeNotifiers(
   bool savedUsesKilojoules,
   bool savedUseMaterialYou,
   int? savedAccentColor,
+  AppLook savedAppLook,
 ) => runApp(
   MultiProvider(
     providers: [
       ChangeNotifierProvider(
         create: (_) => ThemeModeProvider(
           appTheme: savedAppTheme,
+          appLook: savedAppLook,
           useMaterialYou: savedUseMaterialYou,
           accentColor: savedAccentColor,
         ),
@@ -299,10 +314,13 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
     // Persistence above deliberately ran to completion regardless of widget
     // lifetime — what is saved must not depend on whether this State is
     // still mounted. Only the on-screen update needs the live context.
+    if (localeCode != 'zh') {
+      await configRepo.setSelectedLocale('zh');
+    }
     if (!mounted) return;
 
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
-    if (localeProvider.locale?.languageCode == localeCode) {
+    if (localeProvider.locale?.languageCode == 'zh') {
       // Reconciliation kept the in-app language. While that is "System
       // default", this event may be a device language change: MaterialApp
       // follows it by itself; the reminder the OS holds does not (#1366).
@@ -310,7 +328,7 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
       return;
     }
 
-    localeProvider.updateLocale(localeCode != null ? Locale(localeCode) : null);
+    localeProvider.updateLocale(const Locale('zh'));
     // The config was rewritten above, and the singleton SettingsBloc only
     // reloads on LoadSettingsEvent: without this the Language tile and the
     // picker's preselection keep the pre-reconcile value, and confirming the
@@ -326,6 +344,8 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
     final themeProvider = Provider.of<ThemeModeProvider>(context);
     final useMaterialYou = themeProvider.useMaterialYou;
     final accentColor = themeProvider.accentColor;
+    final glass = themeProvider.appLook == AppLook.glass;
+    AppPalette.activeLook = themeProvider.appLook;
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         // The friendly-flat canvas, surfaces and macro colours are fixed; only
@@ -341,7 +361,7 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
           light = light.withAccent(seed);
           dark = dark.withAccent(seed);
         }
-        return _buildMaterialApp(context, light, dark);
+        return _buildMaterialApp(context, light, dark, glass: glass);
       },
     );
   }
@@ -349,15 +369,17 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
   Widget _buildMaterialApp(
     BuildContext context,
     AppPalette lightPalette,
-    AppPalette darkPalette,
-  ) {
+    AppPalette darkPalette, {
+    required bool glass,
+  }) {
     return MaterialApp(
       onGenerateTitle: (context) => S.of(context).appTitle,
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(lightPalette),
-      darkTheme: buildAppTheme(darkPalette),
+      theme: buildAppTheme(lightPalette, glass: glass),
+      darkTheme: buildAppTheme(darkPalette, glass: glass),
       themeMode: Provider.of<ThemeModeProvider>(context).themeMode,
-      locale: Provider.of<LocaleProvider>(context).locale,
+      locale: const Locale('zh'),
+      localeListResolutionCallback: (_, _) => const Locale('zh'),
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -366,8 +388,14 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
       ],
       supportedLocales: _appLocales,
       // Above the Navigator, so dialogs and sheets are covered too.
-      builder: (context, child) =>
-          KeyboardDismisser(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) {
+        final page = KeyboardDismisser(child: child ?? const SizedBox.shrink());
+        return GlassBackdrop(
+          enabled: glass,
+          dark: Theme.of(context).brightness == Brightness.dark,
+          child: page,
+        );
+      },
       initialRoute: NavigationOptions.splashRoute,
       routes: {
         NavigationOptions.splashRoute: (context) =>
@@ -378,7 +406,8 @@ class _OpenNutriTrackerAppState extends State<OpenNutriTrackerApp>
         NavigationOptions.settingsRoute: (context) => const SettingsScreen(),
         NavigationOptions.accentColourRoute: (context) =>
             const AccentColourScreen(),
-        NavigationOptions.healthSyncRoute: (context) => const HealthSyncScreen(),
+        NavigationOptions.healthSyncRoute: (context) =>
+            const HealthSyncScreen(),
         NavigationOptions.addMealRoute: (context) => const AddMealScreen(),
         NavigationOptions.bulkAddRoute: (context) => const BulkAddScreen(),
         NavigationOptions.scannerRoute: (context) => const ScannerScreen(),

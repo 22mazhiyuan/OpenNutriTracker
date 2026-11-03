@@ -28,4 +28,23 @@ abstract class HealthService {
   /// Null when nothing is recorded or the read was not permitted — the
   /// suggestion calculator treats that as "fall back to BMI".
   Future<double?> readLatestBodyFatPercent();
+
+  /// Asks only for today's step count. Kept separate from [requestPermissions]
+  /// so a declined step grant does not turn workout import off.
+  Future<bool> requestStepPermission();
+
+  /// Steps between local midnight and now. [StepReadResult.permitted] is
+  /// false when the platform refused or has no health store — callers must
+  /// not draw that as zero steps.
+  Future<StepReadResult> readTodaySteps();
+}
+
+/// A step-count read. [steps] is meaningful only when [permitted] is true.
+class StepReadResult {
+  final bool permitted;
+  final int steps;
+
+  const StepReadResult({required this.permitted, required this.steps});
+
+  static const unavailable = StepReadResult(permitted: false, steps: 0);
 }

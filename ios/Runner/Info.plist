@@ -62,15 +62,15 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera permission is used to scan barcodes, to attach a photo to a custom meal so it's easier to recognise in your saved list, and — only if you turn on AI meal assistance — to photograph a meal so the provider you configured can read what is in it. That photo is sent for that one request; the app saves no copy of its own and deletes the camera's temporary file as soon as it has been encoded, so the photo is not in your saved meals and not in your exports.</string>
+	<string>相机用于扫描条形码、给自定义餐食添加照片以便识别，以及在你开启 AI 记录后拍摄餐食。照片只发送这一次，应用不会保存副本，编码完成后会删除相机临时文件，因此照片不会进入已保存的餐食或导出文件。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-    <string>Used to attach a photo to a custom meal so it's easier to recognise in your saved list, and for exporting data.</string>
+    <string>用于给自定义餐食添加照片以便识别，以及导出数据。</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Read access to your workouts and body fat percentage is used to import workouts into your diary and to suggest how much of their energy to credit toward your daily goal. Nothing is written back to Health, and the data stays on your device.</string>
+	<string>读取你的锻炼、今日步数和体脂率，用于把锻炼导入日记、在首页显示步数，并建议把多少能量计入每日目标。不会写回健康，数据只留在这台设备上。</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Local network access is used only when you point AI meal logging at a server you run yourself — Ollama, LM Studio, llama.cpp or vLLM — at an address you type in. Nothing is sent unless you enter that address, and the app never discovers or contacts any other device on your network.</string>
+	<string>仅当你把 AI 记录指向自己运行的服务器（Ollama、LM Studio、llama.cpp 或 vLLM）并填写地址时，才会使用本地网络。不填写地址就不会发送任何内容，应用也不会发现或联系网络上的其他设备。</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>OpenNutriTracker does not write anything to Health. It only reads finished workouts and your most recent body fat percentage, and the activities it creates from them stay in your diary on this device. iOS asks for this description because the health framework the app uses includes write access, which the app never requests.</string>
+	<string>轻卡记不会向健康写入任何内容。它只读取已完成的锻炼、今日步数和最近的体脂率，由此生成的活动只保存在这台设备的日记里。iOS 要求提供这段说明，是因为所用的健康框架包含写入接口，而本应用从未请求写入。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
