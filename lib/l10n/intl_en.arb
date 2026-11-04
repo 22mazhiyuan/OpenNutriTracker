@@ -1493,5 +1493,19 @@
   "storageRecoveryBody": "Your data files have not been changed. Try again. If the problem persists, contact support before clearing the app data or reinstalling.",
   "storageRecoveryErrorCode": "Error code: {code}",
   "@storageRecoveryErrorCode": {"placeholders": {"code": {"type": "String"}}},
-  "storageRecoveryRetry": "Retry"
+  "storageRecoveryRetry": "Retry",
+  "tabHomeLabel": "Home",
+  "tabPlazaLabel": "Plaza",
+  "tabWeightCenterLabel": "Weight center",
+  "tabShopLabel": "Shop",
+  "comingSoonLabel": "Coming soon",
+  "comingSoonBody": "This page has no service yet, so there is nothing to show. It will appear here when it does.",
+  "dietRecordLabel": "Diet log",
+  "exerciseEntryLabel": "Exercise",
+  "measurementsEntryLabel": "Measurements",
+  "fastingEntryLabel": "Fasting",
+  "planTitle": "Weight plan",
+  "planCurrentLabel": "Current",
+  "planLostLabel": "Lost",
+  "todayDietLabel": "Today's meals"
 }

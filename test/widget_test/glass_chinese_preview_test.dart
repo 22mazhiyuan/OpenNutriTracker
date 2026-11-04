@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:opennutritracker/core/data/repository/config_repository.dart';
 import 'package:opennutritracker/core/domain/entity/app_look.dart';
@@ -25,12 +26,22 @@ import 'package:opennutritracker/core/styles/app_theme.dart';
 import 'package:opennutritracker/core/utils/custom_icons.dart';
 import 'package:opennutritracker/core/utils/energy_unit_provider.dart';
 import 'package:opennutritracker/features/add_meal/presentation/add_meal_type.dart';
-import 'package:opennutritracker/features/diary/presentation/widgets/diary_table_calendar.dart';
-import 'package:opennutritracker/features/home/presentation/widgets/dashboard_widget.dart';
+import 'package:opennutritracker/core/domain/entity/user_bmi_entity.dart';
+import 'package:opennutritracker/core/domain/entity/user_entity.dart';
+import 'package:opennutritracker/core/domain/entity/user_gender_entity.dart';
+import 'package:opennutritracker/core/domain/entity/user_pal_entity.dart';
+import 'package:opennutritracker/core/domain/entity/user_weight_goal_entity.dart';
+import 'package:opennutritracker/core/domain/entity/profile_entity.dart';
+import 'package:opennutritracker/core/domain/usecase/get_profiles_usecase.dart';
+import 'package:opennutritracker/core/domain/usecase/get_user_usecase.dart';
+import 'package:opennutritracker/features/home/presentation/screens/coming_soon_page.dart';
+import 'package:opennutritracker/features/home/presentation/widgets/home_entry_tile.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/intake_vertical_list.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/quick_water_widget.dart';
-import 'package:opennutritracker/features/home/presentation/widgets/quick_weight_widget.dart';
 import 'package:opennutritracker/features/home/presentation/widgets/steps_home_card.dart';
+import 'package:opennutritracker/features/home/presentation/widgets/today_kcal_card.dart';
+import 'package:opennutritracker/features/home/presentation/widgets/weight_plan_card.dart';
+import 'package:opennutritracker/features/profile/profile_page.dart';
 import 'package:opennutritracker/features/profile/presentation/weight_history_screen.dart';
 import 'package:opennutritracker/features/add_meal/domain/usecase/probe_ai_endpoint_usecase.dart';
 import 'package:opennutritracker/features/add_meal/domain/usecase/run_ai_endpoint_probe_usecase.dart';
@@ -39,7 +50,6 @@ import 'package:opennutritracker/features/diary/presentation/bloc/diary_bloc.dar
 import 'package:opennutritracker/features/home/presentation/bloc/home_bloc.dart';
 import 'package:opennutritracker/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:opennutritracker/features/settings/presentation/bloc/settings_bloc.dart';
-import 'package:opennutritracker/features/settings/settings_screen.dart';
 import 'package:opennutritracker/features/trends/presentation/bloc/trends_bloc.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 import 'package:provider/provider.dart';
@@ -155,44 +165,117 @@ void main() {
       Scaffold(
         extendBody: true,
         appBar: AppBar(
-          title: Text(s.homeLabel),
+          title: Text(s.appTitle),
           backgroundColor: Colors.transparent,
           flexibleSpace: const GlassBarBackground(),
         ),
         body: ListView(
           padding: const EdgeInsets.only(bottom: 120),
           children: [
-            DashboardWidget(
-              totalKcalDaily: 1600,
-              totalKcalLeft: 640,
-              totalKcalSupplied: 780,
-              totalKcalBurned: 180,
-              totalCarbsIntake: 90,
-              totalFatsIntake: 28,
-              totalProteinsIntake: 42,
-              totalCarbsGoal: 200,
-              totalFatsGoal: 50,
-              totalProteinsGoal: 80,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: WeightPlanCard(
+                currentKg: 62.4,
+                targetKg: 58,
+                startKg: 64.2,
+                unit: BodyWeightUnit.kg,
+              ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: QuickWeightWidget(
-                      weightKg: 62.4,
-                      bodyWeightUnit: BodyWeightUnit.kg,
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: HomeEntryTile(
+                          id: 'home-entry-diet',
+                          icon: Icons.restaurant_outlined,
+                          title: s.dietRecordLabel,
+                          subtitle: '780 ${s.kcalLabel}',
+                          onTap: () {},
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: HomeEntryTile(
+                          id: 'home-entry-exercise',
+                          icon: Icons.directions_run_outlined,
+                          title: s.exerciseEntryLabel,
+                          subtitle: '180 ${s.kcalLabel}',
+                          onTap: () {},
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 12),
-                  Expanded(child: StepsHomeCard()),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: HomeEntryTile(
+                          id: 'home-entry-weight',
+                          icon: Icons.monitor_weight_outlined,
+                          title: s.weightLabel,
+                          subtitle: '62.4 ${s.kgLabel}',
+                          onTap: () {},
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: HomeEntryTile(
+                          id: 'home-entry-measurements',
+                          icon: Icons.straighten_outlined,
+                          title: s.measurementsEntryLabel,
+                          onTap: () {},
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  HomeEntryTile(
+                    id: 'home-entry-trends',
+                    icon: Icons.insights_outlined,
+                    title: s.trendsLabel,
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Expanded(child: StepsHomeCard()),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: HomeEntryTile(
+                          id: 'home-entry-fasting',
+                          icon: Icons.timer_outlined,
+                          title: s.fastingEntryLabel,
+                          onTap: () {},
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const QuickWaterWidget(waterMlToday: 800, waterGoalMl: 2000),
                 ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Text(
+                s.todayDietLabel,
+                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              child: QuickWaterWidget(waterMlToday: 800, waterGoalMl: 2000),
+              child: TodayKcalCard(
+                totalKcalDaily: 1600,
+                totalKcalLeft: 640,
+                totalKcalSupplied: 780,
+                totalKcalBurned: 180,
+              ),
             ),
             for (final meal in <(String, IconData, AddMealType, double)>[
               (
@@ -233,49 +316,75 @@ void main() {
           ],
         ),
         bottomNavigationBar: _PreviewGlassBar(
-          labels: [s.homeLabel, s.diaryLabel, s.trendsLabel, s.youLabel],
-        ),
-      ),
-      size: const Size(390, 1280),
-    );
-
-    final today = DateTime(2026, 11, 3);
-    await shoot(
-      'diary',
-      Scaffold(
-        appBar: AppBar(
-          title: Text(s.diaryLabel),
-          backgroundColor: Colors.transparent,
-          flexibleSpace: const GlassBarBackground(),
-        ),
-        body: ListView(
-          children: [
-            DiaryTableCalendar(
-              onDateSelected: (_, _) {},
-              calendarDurationDays: const Duration(days: 60),
-              focusedDate: today,
-              currentDate: today,
-              selectedDate: today,
-              trackedDaysMap: const {},
-            ),
+          labels: [
+            s.tabHomeLabel,
+            s.tabPlazaLabel,
+            s.tabWeightCenterLabel,
+            s.tabShopLabel,
+            s.youLabel,
           ],
         ),
       ),
+      size: const Size(390, 1480),
+    );
+
+    Widget tabScaffold(String title, Widget body, int selected) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+          backgroundColor: Colors.transparent,
+          flexibleSpace: const GlassBarBackground(),
+        ),
+        body: body,
+        bottomNavigationBar: _PreviewGlassBar(
+          selected: selected,
+          labels: [
+            s.tabHomeLabel,
+            s.tabPlazaLabel,
+            s.tabWeightCenterLabel,
+            s.tabShopLabel,
+            s.youLabel,
+          ],
+        ),
+      );
+    }
+
+    await shoot(
+      'plaza',
+      tabScaffold(
+        s.tabPlazaLabel,
+        const ComingSoonPage(semanticsId: 'plaza-coming-soon'),
+        1,
+      ),
     );
 
     await shoot(
-      'body',
-      WeightHistoryScreen(
-        getUsecase: _ShotWeightLog(),
-        addUsecase: _ShotAddWeight(),
-        deleteUsecase: _ShotDeleteWeight(),
-        configRepository: _ShotConfig(),
+      'center',
+      tabScaffold(
+        s.tabWeightCenterLabel,
+        WeightHistoryScreen(
+          embedded: true,
+          getUsecase: _ShotWeightLog(),
+          addUsecase: _ShotAddWeight(),
+          deleteUsecase: _ShotDeleteWeight(),
+          configRepository: _ShotConfig(),
+          getUserUsecase: _ShotUser(),
+        ),
+        2,
+      ),
+    );
+
+    await shoot(
+      'shop',
+      tabScaffold(
+        s.tabShopLabel,
+        const ComingSoonPage(semanticsId: 'shop-coming-soon'),
+        3,
       ),
     );
 
     final getIt = GetIt.instance;
     getIt.registerSingleton<SettingsBloc>(_ShotSettingsBloc());
-    getIt.registerSingleton<ProfileBloc>(_ShotProfileBloc());
     getIt.registerSingleton<HomeBloc>(_ShotHomeBloc());
     getIt.registerSingleton<DiaryBloc>(_ShotDiaryBloc());
     getIt.registerSingleton<CalendarDayBloc>(_ShotCalendarBloc());
@@ -285,8 +394,34 @@ void main() {
     getIt.registerSingleton<AiEndpointProbeRunner>(
       AiEndpointProbeRunner(credentials, _ShotProber()),
     );
+    final user = UserEntity(
+      birthday: DateTime(1998, 4, 2),
+      heightCM: 165,
+      weightKG: 62.4,
+      gender: UserGenderEntity.female,
+      goal: UserWeightGoalEntity.loseWeight,
+      pal: UserPALEntity.sedentary,
+      targetWeightKg: 58,
+    );
+    getIt.registerSingleton<GetUserUsecase>(_ShotUser());
+    getIt.registerSingleton<GetProfilesUsecase>(_ShotProfiles());
+    getIt.registerSingleton<AddWeightLogUsecase>(_ShotAddWeight());
+    final profileBloc = _LoadedProfileBloc(
+      ProfileLoadedState(
+        userBMI: const UserBMIEntity(
+          bmiValue: 22.9,
+          nutritionalStatus: UserNutritionalStatus.normalWeight,
+        ),
+        userEntity: user,
+        bodyWeightUnit: BodyWeightUnit.kg,
+        usesImperialHeightUnits: false,
+        effectiveWaterGoalMl: 2000,
+      ),
+    );
+    getIt.registerSingleton<ProfileBloc>(profileBloc);
+    addTearDown(profileBloc.close);
     addTearDown(locator.reset);
-    await shoot('settings', const SettingsScreen());
+    await shoot('mine', tabScaffold(s.youLabel, const ProfilePage(), 4));
 
     expect(File('${dir.path}/home.png').existsSync(), isTrue);
   });
@@ -329,7 +464,53 @@ class _ShotSettingsBloc extends Fake implements SettingsBloc {
   void add(SettingsEvent event) {}
 }
 
-class _ShotProfileBloc extends Fake implements ProfileBloc {}
+class _LoadedProfileBloc extends Bloc<ProfileEvent, ProfileState>
+    implements ProfileBloc {
+  _LoadedProfileBloc(super.initialState) {
+    on<LoadProfileEvent>((event, emit) => emit(state));
+  }
+
+  @override
+  Future<UserEntity> getUser() async =>
+      (state as ProfileLoadedState).userEntity;
+
+  @override
+  Future<void> setCaloriesTaperEnabled(bool enabled) async {}
+
+  @override
+  Future<void> updateUser(UserEntity userEntity) async {}
+}
+
+class _ShotUser extends Fake implements GetUserUsecase {
+  @override
+  Future<UserEntity> getUserData() async => UserEntity(
+    birthday: DateTime(1998, 4, 2),
+    heightCM: 165,
+    weightKG: 62.4,
+    gender: UserGenderEntity.female,
+    goal: UserWeightGoalEntity.loseWeight,
+    pal: UserPALEntity.sedentary,
+    targetWeightKg: 58,
+  );
+}
+
+class _ShotProfiles implements GetProfilesUsecase {
+  static final _profile = ProfileEntity(
+    id: 'p1',
+    name: '我',
+    createdAt: DateTime(2026, 1, 1),
+    boxSuffix: '',
+  );
+
+  @override
+  List<ProfileEntity> getProfiles() => [_profile];
+
+  @override
+  String get activeProfileId => 'p1';
+
+  @override
+  ProfileEntity? getActiveProfile() => _profile;
+}
 
 class _ShotHomeBloc extends Fake implements HomeBloc {
   @override
@@ -396,8 +577,9 @@ class _ShotProber extends Fake implements AiEndpointProber {}
 /// Blur is off in this test; the device build blurs.
 class _PreviewGlassBar extends StatelessWidget {
   final List<String> labels;
+  final int selected;
 
-  const _PreviewGlassBar({required this.labels});
+  const _PreviewGlassBar({required this.labels, this.selected = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -405,13 +587,14 @@ class _PreviewGlassBar extends StatelessWidget {
     final muted = AppPalette.light.textMuted;
     const icons = [
       Icons.home_outlined,
-      Icons.book_outlined,
-      Icons.insights_outlined,
+      Icons.forum_outlined,
+      Icons.monitor_weight_outlined,
+      Icons.storefront_outlined,
       Icons.account_circle_outlined,
     ];
     Widget item(int index) {
-      final selected = index == 0;
-      final color = selected ? accent : muted;
+      final on = index == selected;
+      final color = on ? accent : muted;
       return Expanded(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -432,39 +615,16 @@ class _PreviewGlassBar extends StatelessWidget {
 
     return SafeArea(
       top: false,
-      child: SizedBox(
-        height: 96,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 28, 16, 10),
-              child: GlassSurface(
-                borderRadius: 32,
-                child: SizedBox(
-                  height: 58,
-                  child: Row(
-                    children: [
-                      item(0),
-                      item(1),
-                      const SizedBox(width: 64),
-                      item(2),
-                      item(3),
-                    ],
-                  ),
-                ),
-              ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+        child: GlassSurface(
+          borderRadius: 28,
+          child: SizedBox(
+            height: 62,
+            child: Row(
+              children: [for (var i = 0; i < labels.length; i++) item(i)],
             ),
-            Positioned(
-              top: 0,
-              child: FloatingActionButton(
-                onPressed: () {},
-                elevation: 0,
-                backgroundColor: accent,
-                child: const Icon(Icons.add, size: 30),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

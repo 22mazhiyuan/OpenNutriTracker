@@ -20,6 +20,7 @@ import 'package:opennutritracker/core/utils/reload_diary_and_trends.dart';
 import 'package:opennutritracker/features/profile/presentation/utils/profile_display_format.dart';
 import 'package:opennutritracker/features/profile/presentation/widgets/body_weight_input.dart';
 import 'package:opennutritracker/features/profile/presentation/widgets/metric_trend_chart.dart';
+import 'package:opennutritracker/features/home/presentation/widgets/weight_plan_card.dart';
 import 'package:opennutritracker/features/profile/presentation/widgets/weight_trend_chart.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
@@ -44,6 +45,12 @@ class WeightHistoryScreen extends StatefulWidget {
   final AddBodyMeasurementUsecase? addMeasurementUsecase;
   final DeleteBodyMeasurementUsecase? deleteMeasurementUsecase;
 
+  /// When true, the tab shell already supplies the app bar.
+  final bool embedded;
+
+  /// Opens on a circumference or body-fat chart instead of weight.
+  final BodyMetric? initialMetric;
+
   const WeightHistoryScreen({
     super.key,
     this.getUsecase,
@@ -54,6 +61,8 @@ class WeightHistoryScreen extends StatefulWidget {
     this.getMeasurementsUsecase,
     this.addMeasurementUsecase,
     this.deleteMeasurementUsecase,
+    this.embedded = false,
+    this.initialMetric,
   });
 
   @override
@@ -92,6 +101,7 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _bodyMetric = widget.initialMetric;
     _load();
   }
 
@@ -196,14 +206,20 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currentKg = _profileWeightKg;
+    final oldest = _entries.isEmpty ? null : _entries.last.weightKg;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppPalette.glassActive ? Colors.transparent : null,
-        flexibleSpace: AppPalette.glassActive
-            ? const GlassBarBackground()
-            : null,
-        title: Text(S.of(context).profileWeightHistoryTitle),
-      ),
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              backgroundColor: AppPalette.glassActive
+                  ? Colors.transparent
+                  : null,
+              flexibleSpace: AppPalette.glassActive
+                  ? const GlassBarBackground()
+                  : null,
+              title: Text(S.of(context).profileWeightHistoryTitle),
+            ),
       floatingActionButton: Semantics(
         identifier: 'weight-history-add',
         child: FloatingActionButton.extended(
@@ -212,10 +228,23 @@ class _WeightHistoryScreenState extends State<WeightHistoryScreen> {
           label: Text(S.of(context).weightHistoryAddEntry),
         ),
       ),
+      floatingActionButtonLocation: widget.embedded
+          ? FloatingActionButtonLocation.centerFloat
+          : FloatingActionButtonLocation.endFloat,
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                if (currentKg != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: WeightPlanCard(
+                      currentKg: currentKg,
+                      targetKg: _targetWeightKg,
+                      startKg: oldest,
+                      unit: _bodyWeightUnit,
+                    ),
+                  ),
                 _buildMetricSelector(),
                 Expanded(
                   child: _bodyMetric == null

@@ -9,12 +9,12 @@ import 'package:opennutritracker/core/utils/health_rationale_service.dart';
 import 'package:opennutritracker/core/utils/locator.dart';
 import 'package:opennutritracker/core/utils/meal_type_suggester.dart';
 import 'package:opennutritracker/core/utils/navigation_options.dart';
-import 'package:opennutritracker/features/diary/diary_page.dart';
 import 'package:opennutritracker/core/presentation/widgets/home_appbar.dart';
 import 'package:opennutritracker/features/home/home_page.dart';
+import 'package:opennutritracker/features/home/presentation/screens/coming_soon_page.dart';
+import 'package:opennutritracker/features/home/presentation/screens/weight_center_page.dart';
 import 'package:opennutritracker/core/presentation/widgets/main_appbar.dart';
 import 'package:opennutritracker/features/profile/profile_page.dart';
-import 'package:opennutritracker/features/trends/presentation/trends_page.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
 class MainScreen extends StatefulWidget {
@@ -105,15 +105,29 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void didChangeDependencies() {
     _bodyPages = [
       const HomePage(),
-      const DiaryPage(),
-      const TrendsPage(),
+      const ComingSoonPage(semanticsId: 'plaza-coming-soon'),
+      const WeightCenterPage(),
+      const ComingSoonPage(semanticsId: 'shop-coming-soon'),
       const ProfilePage(),
     ];
     _appbarPages = [
       const HomeAppbar(),
-      MainAppbar(title: S.of(context).diaryLabel, iconData: Icons.book),
-      MainAppbar(title: S.of(context).trendsLabel, iconData: Icons.insights),
-      MainAppbar(title: S.of(context).youLabel, iconData: Icons.account_circle),
+      MainAppbar(
+        title: S.of(context).tabPlazaLabel,
+        iconData: Icons.forum_outlined,
+      ),
+      MainAppbar(
+        title: S.of(context).tabWeightCenterLabel,
+        iconData: Icons.monitor_weight_outlined,
+      ),
+      MainAppbar(
+        title: S.of(context).tabShopLabel,
+        iconData: Icons.storefront_outlined,
+      ),
+      MainAppbar(
+        title: S.of(context).youLabel,
+        iconData: Icons.account_circle_outlined,
+      ),
     ];
     super.didChangeDependencies();
   }
@@ -128,39 +142,48 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         id: 'nav-home',
         icon: Icons.home_outlined,
         selectedIcon: Icons.home_rounded,
-        label: S.of(context).homeLabel,
+        label: S.of(context).tabHomeLabel,
         index: 0,
         selectedIndex: _selectedPageIndex,
         palette: palette,
         onTap: _setPage,
       ),
       _NavItem(
-        id: 'nav-diary',
-        icon: Icons.book_outlined,
-        selectedIcon: Icons.book_rounded,
-        label: S.of(context).diaryLabel,
+        id: 'nav-plaza',
+        icon: Icons.forum_outlined,
+        selectedIcon: Icons.forum_rounded,
+        label: S.of(context).tabPlazaLabel,
         index: 1,
         selectedIndex: _selectedPageIndex,
         palette: palette,
         onTap: _setPage,
       ),
-      const SizedBox(width: 64),
       _NavItem(
-        id: 'nav-trends',
-        icon: Icons.insights_outlined,
-        selectedIcon: Icons.insights_rounded,
-        label: S.of(context).trendsLabel,
+        id: 'nav-weight-center',
+        icon: Icons.monitor_weight_outlined,
+        selectedIcon: Icons.monitor_weight_rounded,
+        label: S.of(context).tabWeightCenterLabel,
         index: 2,
         selectedIndex: _selectedPageIndex,
         palette: palette,
         onTap: _setPage,
       ),
       _NavItem(
-        id: 'nav-you',
+        id: 'nav-shop',
+        icon: Icons.storefront_outlined,
+        selectedIcon: Icons.storefront_rounded,
+        label: S.of(context).tabShopLabel,
+        index: 3,
+        selectedIndex: _selectedPageIndex,
+        palette: palette,
+        onTap: _setPage,
+      ),
+      _NavItem(
+        id: 'nav-mine',
         icon: Icons.account_circle_outlined,
         selectedIcon: Icons.account_circle_rounded,
         label: S.of(context).youLabel,
-        index: 3,
+        index: 4,
         selectedIndex: _selectedPageIndex,
         palette: palette,
         onTap: _setPage,
@@ -180,31 +203,23 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           ),
         ],
       ),
-      floatingActionButton: glass
-          ? null
-          : Semantics(
-              identifier: 'fab-add-item',
-              child: FloatingActionButton(
-                onPressed: () => _onFabPressed(context),
-                tooltip: S.of(context).addLabel,
-                child: const Icon(Icons.add, size: 30),
-              ),
-            ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: Semantics(
+        identifier: 'fab-add-item',
+        child: FloatingActionButton(
+          onPressed: () => _onFabPressed(context),
+          tooltip: S.of(context).addLabel,
+          child: const Icon(Icons.add, size: 30),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: glass
-          ? _GlassTabBar(
-              onAdd: () => _onFabPressed(context),
-              addLabel: S.of(context).addLabel,
-              children: nav,
-            )
+          ? _GlassTabBar(children: nav)
           : BottomAppBar(
               color: palette.surface,
               surfaceTintColor: Colors.transparent,
               elevation: 0,
-              height: 78,
+              height: 72,
               padding: EdgeInsets.zero,
-              shape: const CircularNotchedRectangle(),
-              notchMargin: 8,
               child: Row(children: nav),
             ),
     );
@@ -240,47 +255,19 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 }
 
 class _GlassTabBar extends StatelessWidget {
-  final VoidCallback onAdd;
-  final String addLabel;
   final List<Widget> children;
 
-  const _GlassTabBar({
-    required this.onAdd,
-    required this.addLabel,
-    required this.children,
-  });
+  const _GlassTabBar({required this.children});
 
   @override
   Widget build(BuildContext context) {
-    final accent = Theme.of(context).colorScheme.primary;
     return SafeArea(
       top: false,
-      child: SizedBox(
-        height: 96,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 28, 16, 10),
-              child: GlassSurface(
-                borderRadius: 32,
-                child: SizedBox(height: 58, child: Row(children: children)),
-              ),
-            ),
-            Positioned(
-              top: 0,
-              child: Semantics(
-                identifier: 'fab-add-item',
-                child: FloatingActionButton(
-                  onPressed: onAdd,
-                  tooltip: addLabel,
-                  elevation: 0,
-                  backgroundColor: accent,
-                  child: const Icon(Icons.add, size: 30),
-                ),
-              ),
-            ),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+        child: GlassSurface(
+          borderRadius: 28,
+          child: SizedBox(height: 62, child: Row(children: children)),
         ),
       ),
     );
@@ -332,12 +319,14 @@ class _NavItem extends StatelessWidget {
                   child: Icon(
                     (selected && !AppPalette.glassActive) ? selectedIcon : icon,
                     color: color,
-                    size: 26,
+                    size: 22,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(
                     context,
                   ).textTheme.labelSmall?.copyWith(color: color),

@@ -1407,5 +1407,19 @@
   "storageRecoveryTitle": "本地数据无法安全打开",
   "storageRecoveryBody": "数据文件没有被改动。请再试一次。如果问题还在，请先联系支持，不要清除应用数据或重新安装。",
   "storageRecoveryErrorCode": "错误代码：{code}",
-  "storageRecoveryRetry": "重试"
+  "storageRecoveryRetry": "重试",
+  "tabHomeLabel": "首页",
+  "tabPlazaLabel": "广场",
+  "tabWeightCenterLabel": "减重中心",
+  "tabShopLabel": "商店",
+  "comingSoonLabel": "即将上线",
+  "comingSoonBody": "这一页还没有服务，所以这里不放示例内容。上线后会显示在这里。",
+  "dietRecordLabel": "饮食记录",
+  "exerciseEntryLabel": "运动",
+  "measurementsEntryLabel": "围度",
+  "fastingEntryLabel": "断食",
+  "planTitle": "减重计划",
+  "planCurrentLabel": "当前",
+  "planLostLabel": "已减",
+  "todayDietLabel": "今日饮食"
 }
