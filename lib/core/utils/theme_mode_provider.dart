@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 import 'package:opennutritracker/core/domain/entity/app_theme_entity.dart';
+import 'package:opennutritracker/core/styles/app_palette.dart';
 
 class ThemeModeProvider extends ChangeNotifier {
   AppThemeEntity appTheme;
+  AppLook appLook;
   // #415: whether to harmonise the app palette with the system wallpaper
   // when one is available (Android 12+). On other platforms the static
   // palette is used regardless, so the toggle has no visible effect.
@@ -13,9 +16,12 @@ class ThemeModeProvider extends ChangeNotifier {
 
   ThemeModeProvider({
     required this.appTheme,
+    this.appLook = AppLook.glass,
     this.useMaterialYou = true,
     this.accentColor,
-  });
+  }) {
+    AppPalette.activeLook = appLook;
+  }
 
   ThemeMode get themeMode => appTheme.toThemeMode();
 
@@ -33,6 +39,13 @@ class ThemeModeProvider extends ChangeNotifier {
   void updateAccentColor(int? value) {
     if (accentColor == value) return;
     accentColor = value;
+    notifyListeners();
+  }
+
+  void updateLook(AppLook value) {
+    if (appLook == value) return;
+    appLook = value;
+    AppPalette.activeLook = value;
     notifyListeners();
   }
 }

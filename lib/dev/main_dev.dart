@@ -58,5 +58,6 @@ Future<void> main() async {
     config.usesKilojoules,
     config.useMaterialYou,
     config.accentColor,
+    config.appLook,
   );
 }

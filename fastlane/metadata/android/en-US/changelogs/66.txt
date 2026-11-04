@@ -1,6 +1,6 @@
-- Now in Spanish and Hungarian, with food names in the language you read the app in
-- Minerals and vitamins on Open Food Facts foods were saved far too small; they are corrected automatically, so those numbers will change
-- Log a serving with 0.5x, 1x, 2x or 100 g, or default to weight in settings
-- "A slice of bread" now logs a regular slice, not the smallest one listed
-- Your weight chart carries a 7-day average
-- Database foods show their full description
+- 食物名称会跟着你使用的语言显示
+- 修正了开放食物数据库里矿物质和维生素被存得过小的问题，这些数字会自动更正
+- 记录份量时可以选择 0.5 倍、1 倍、2 倍或 100 克，也可以在设置里默认按重量
+- 「一片面包」会按普通一片记录，而不是列表里最小的那片
+- 体重图带有 7 天平均线
+- 数据库里的食物会显示完整说明

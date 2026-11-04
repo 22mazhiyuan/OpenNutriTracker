@@ -1,4 +1,5 @@
 import 'package:opennutritracker/core/data/repository/config_repository.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 import 'package:opennutritracker/core/domain/entity/app_theme_entity.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/core/domain/entity/config_entity.dart';
@@ -34,6 +35,10 @@ class AddConfigUsecase {
 
   Future<void> setConfigAppTheme(AppThemeEntity appTheme) async {
     await _configRepository.setConfigAppTheme(appTheme);
+  }
+
+  Future<void> setConfigAppLook(AppLook look) async {
+    await _configRepository.setConfigAppLook(look);
   }
 
   Future<void> setConfigUsesImperialUnits(bool usesImperialUnits) async {

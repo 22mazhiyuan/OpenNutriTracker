@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:opennutritracker/features/diary/presentation/widgets/diary_table_calendar.dart';
 import 'package:opennutritracker/generated/l10n.dart';
 
@@ -64,5 +65,42 @@ void main() {
             '${given}px, so the top and bottom of the label are cut off',
       );
     }
+  });
+
+  testWidgets('a Chinese locale names the month and each weekday', (
+    tester,
+  ) async {
+    await tester.runAsync(() => initializeDateFormatting('zh'));
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('zh'),
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: S.supportedLocales,
+        home: Scaffold(
+          body: DiaryTableCalendar(
+            onDateSelected: (_, _) {},
+            calendarDurationDays: const Duration(days: 60),
+            focusedDate: DateTime(2026, 11, 3),
+            currentDate: DateTime(2026, 11, 3),
+            selectedDate: DateTime(2026, 11, 3),
+            trackedDaysMap: const {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('2026年11月'), findsOneWidget);
+    // Narrow weekday headings. Abbreviated Chinese weekdays are 周一…周日,
+    // and the first character of every one of those is 周.
+    expect(find.text('一'), findsOneWidget);
+    expect(find.text('日'), findsOneWidget);
+    expect(find.text('周'), findsNothing);
+    expect(find.text('November 2026'), findsNothing);
   });
 }

@@ -234,6 +234,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           showActivityTracking: showActivityTracking,
           showMealMacros: showMealMacros,
           userWeightKg: user.weightKG,
+          targetWeightKg: user.targetWeightKg,
           breakfastKcalTarget: breakfastKcalTarget,
           lunchKcalTarget: lunchKcalTarget,
           dinnerKcalTarget: dinnerKcalTarget,

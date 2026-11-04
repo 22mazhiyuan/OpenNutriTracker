@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:opennutritracker/core/presentation/widgets/axis_title.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/core/domain/entity/weight_log_entity.dart';
 import 'package:opennutritracker/core/utils/calc/calendar_day_calc.dart';
@@ -123,9 +124,10 @@ class WeightTrendChart extends StatelessWidget {
         for (final point
             in WeightMovingAverage(windowDays: movingAverageWindowDays!)
                 .compute(entries)
-                .where((p) =>
-                    !p.date.isBefore(windowStart) &&
-                    !p.date.isAfter(today)))
+                .where(
+                  (p) =>
+                      !p.date.isBefore(windowStart) && !p.date.isAfter(today),
+                ))
           FlSpot(dayIndex(point.date).toDouble(), _toChartY(point.weightKg)),
     ];
 
@@ -182,10 +184,10 @@ class WeightTrendChart extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 40,
-                  getTitlesWidget: (value, meta) => Text(
-                    value.toStringAsFixed(
-                      bodyWeightUnit == BodyWeightUnit.st ? 1 : 0,
-                    ),
+                  getTitlesWidget: (value, meta) => distinctAxisTitle(
+                    value,
+                    meta,
+                    fractionDigits: bodyWeightUnit == BodyWeightUnit.st ? 1 : 0,
                     style: theme.textTheme.labelSmall,
                   ),
                 ),

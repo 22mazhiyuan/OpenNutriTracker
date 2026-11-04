@@ -1,6 +1,7 @@
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:logging/logging.dart';
 import 'package:opennutritracker/core/data/dbo/app_theme_dbo.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 import 'package:opennutritracker/core/data/dbo/config_dbo.dart';
 import 'package:opennutritracker/core/utils/hive_db_provider.dart';
 
@@ -380,6 +381,10 @@ class ConfigDataSource {
 
   Future<void> setConfigAccentColor(int? value) async {
     await _update((c) => c.accentColor = value);
+  }
+
+  Future<void> setConfigAppLook(AppLook look) async {
+    await _update((c) => c.appLookIndex = look.storageIndex);
   }
 
   Future<void> setConfigScannerPortraitLock(bool value) async {

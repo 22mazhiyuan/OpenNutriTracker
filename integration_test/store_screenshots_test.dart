@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:opennutritracker/core/styles/accent_colors.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 import 'package:opennutritracker/core/domain/entity/app_theme_entity.dart';
 import 'package:opennutritracker/core/domain/usecase/add_config_usecase.dart';
 import 'package:opennutritracker/core/presentation/main_screen.dart';
@@ -181,10 +182,11 @@ void main() {
       app.runAppWithChangeNotifiers(
         true,
         AppThemeEntity.light,
-        const Locale('en'),
+        const Locale('zh'),
         false, // kcal, not kJ
         false, // Material You off — see _brandAccentIndex
         _brandAccentArgb,
+        AppLook.glass,
       );
       // "Give boot up to 30 seconds, then settle" belongs in pumpAndSettle's
       // *third* argument. The first is the interval between pumps, and under

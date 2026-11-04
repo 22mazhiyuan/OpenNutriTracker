@@ -1,5 +1,5 @@
-- Add several items: bad rows are all flagged at once, each with the reason, and a photo that fails to attach offers the retry its message promises
-- AI setup you change is picked up as soon as you come back to the list
-- Your data export now includes photos attached to logged meals, not only saved ones
-- Updated the libraries underneath, including secure storage, file picking and sharing
-- Health sync now asks only for your finished workouts and their energy, not body fat, distance or steps
+- 一次添加多项时，有问题的行会一起标出原因；照片没附上时可以按提示重试
+- 改过的 AI 设置回到列表后会立刻生效
+- 导出现在包含已记录餐食上的照片，不只是收藏的餐食
+- 更新了底层库，包括安全存储、选文件和分享
+- 当时的健康同步只请求已完成的锻炼和能量

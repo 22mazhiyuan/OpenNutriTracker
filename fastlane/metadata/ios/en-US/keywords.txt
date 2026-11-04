@@ -1,1 +1,1 @@
-counter,macro,log,fasting,barcode,offline,weight,diet,open source,privacy,protein,water,journal,keto
+减肥,饮食,热量,喝水,步数,体重,体脂,腰围,日记,隐私,条码,断食

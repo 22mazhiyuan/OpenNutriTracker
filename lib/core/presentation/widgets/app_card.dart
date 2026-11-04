@@ -41,9 +41,15 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? palette.surface,
         borderRadius: radius,
-        border: bordered ? Border.all(color: palette.border, width: Dimens.hairline) : null,
+        border: bordered
+            ? Border.all(color: palette.border, width: Dimens.hairline)
+            : null,
         boxShadow: [
-          BoxShadow(color: palette.shadow, blurRadius: 18, offset: const Offset(0, 6)),
+          BoxShadow(
+            color: palette.shadow,
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       // A transparent Material directly below the colored decoration so any
@@ -65,10 +71,7 @@ class AppCard extends StatelessWidget {
               color: Colors.transparent,
               borderRadius: radius,
               clipBehavior: Clip.antiAlias,
-              child: Padding(
-                padding: padding ?? EdgeInsets.zero,
-                child: child,
-              ),
+              child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
             ),
     );
     if (onTap == null) return tile;

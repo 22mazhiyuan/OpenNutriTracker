@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 import 'package:opennutritracker/core/data/dbo/config_dbo.dart';
 import 'package:opennutritracker/core/domain/entity/app_theme_entity.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
@@ -171,6 +172,7 @@ class ConfigEntity extends Equatable {
   /// behaviour (prefer serving whenever one exists) — flipped only from
   /// Settings → Meal Detail.
   final bool defaultToRawFoodUnits;
+  final AppLook appLook;
 
   /// Which revision of the privacy policy the user has been shown a *notice*
   /// about. Zero for every install that predates the field, which is exactly
@@ -270,6 +272,7 @@ class ConfigEntity extends Equatable {
     this.legacyHealthDeletedExternalIds = const <String>{},
     this.policyNoticeRevisionSeen = 0,
     this.defaultToRawFoodUnits = false,
+    this.appLook = AppLook.glass,
   });
 
   /// The multiplier the importer actually applies. Falls back to crediting
@@ -392,6 +395,7 @@ class ConfigEntity extends Equatable {
         ? Set<String>.from(dbo.healthDeletedExternalIds!)
         : const <String>{},
     defaultToRawFoodUnits: dbo.defaultToRawFoodUnits ?? false,
+    appLook: AppLook.fromStorage(dbo.appLookIndex),
   );
 
   /// Returns the recommended kcal target for [mealKey] given a daily goal.
@@ -497,5 +501,6 @@ class ConfigEntity extends Equatable {
     legacyHealthDeletedExternalIds,
     policyNoticeRevisionSeen,
     defaultToRawFoodUnits,
+    appLook,
   ];
 }
