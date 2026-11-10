@@ -20,15 +20,16 @@ void main() {
   final infoPlist = File('ios/Runner/Info.plist').readAsStringSync();
 
   String? valueFor(String key) => RegExp(
-        '<key>$key</key>\\s*<string>(.*?)</string>',
-        dotAll: true,
-      ).firstMatch(infoPlist)?.group(1);
+    '<key>$key</key>\\s*<string>(.*?)</string>',
+    dotAll: true,
+  ).firstMatch(infoPlist)?.group(1);
 
   group('HealthKit purpose strings', () {
     test('the read string is present and says what is read', () {
       final share = valueFor('NSHealthShareUsageDescription');
       expect(share, isNotNull);
-      expect(share, contains('workouts'));
+      expect(share, contains('锻炼'));
+      expect(share, contains('步数'));
     });
 
     // The one that was missing. Apple rejects the upload without it, and the
@@ -37,7 +38,8 @@ void main() {
       expect(
         valueFor('NSHealthUpdateUsageDescription'),
         isNotNull,
-        reason: 'altool rejects the build with error 90683 without this key, '
+        reason:
+            'altool rejects the build with error 90683 without this key, '
             'even though no write call exists anywhere in lib/',
       );
     });
@@ -48,9 +50,10 @@ void main() {
     test('the write string does not claim the app writes to Health', () {
       final update = valueFor('NSHealthUpdateUsageDescription')!;
       expect(
-        update.toLowerCase(),
-        contains('does not write'),
-        reason: 'the read string and the #926 disclosure both promise nothing '
+        update,
+        contains('不会向健康写入'),
+        reason:
+            'the read string and the #926 disclosure both promise nothing '
             'is written back; this must not contradict them',
       );
     });

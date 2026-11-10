@@ -213,6 +213,11 @@ class ConfigDBO extends HiveObject {
   @HiveField(41)
   bool? localeSyncSeeded;
 
+  /// [AppLook.storageIndex]. Null means the glass look, so installs that
+  /// predate the setting open in it.
+  @HiveField(42)
+  int? appLookIndex;
+
   ConfigDBO(
     this.hasAcceptedDisclaimer,
     this.hasAcceptedPolicy,
@@ -253,6 +258,7 @@ class ConfigDBO extends HiveObject {
     this.defaultToRawFoodUnits,
     this.trackedDaysOffsetMinutes,
     this.localeSyncSeeded,
+    this.appLookIndex,
   });
 
   factory ConfigDBO.empty() =>
@@ -267,6 +273,7 @@ class ConfigDBO extends HiveObject {
     usesImperialFoodUnits: entity.usesImperialFoodUnits,
     usesImperialHeightUnits: entity.usesImperialHeightUnits,
     bodyWeightUnitIndex: entity.bodyWeightUnit.index,
+    appLookIndex: entity.appLook.storageIndex,
   );
 
   factory ConfigDBO.fromJson(Map<String, dynamic> json) =>

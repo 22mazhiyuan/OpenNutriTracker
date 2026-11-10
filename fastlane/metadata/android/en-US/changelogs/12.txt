@@ -1,1 +1,1 @@
- * Initial Fdroid release
+* 首次在 F-Droid 发布

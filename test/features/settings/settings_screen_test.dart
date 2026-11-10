@@ -190,16 +190,15 @@ void main() {
       // scrolls to a computed offset, which a fling never rests at. So this
       // pins the structural property the fix rests on instead, and says so
       // rather than implying wider cover.
-      await tester.pumpWidget(
-        embeddedIn(const SettingsScreen(embedded: true)),
-      );
+      await tester.pumpWidget(embeddedIn(const SettingsScreen(embedded: true)));
       await tester.pumpAndSettle();
 
       final scrollables = tester.widgetList(find.byType(Scrollable));
       expect(
         scrollables,
         hasLength(1),
-        reason: 'only the host scrollable — the embedded settings must add '
+        reason:
+            'only the host scrollable — the embedded settings must add '
             'none of its own',
       );
     });
@@ -328,58 +327,25 @@ void main() {
     expect(find.byType(AiAssistDialog), findsNothing);
   });
 
-  testWidgets('the language list scrolls when it is taller than the dialog '
-      '(#1331)', (tester) async {
-    // Twelve rows do not fit on a short phone. The list used to be a bare
-    // Column: it overflowed past the action buttons, the last language was
-    // painted outside the dialog, and nothing scrolled to reach it.
-    tester.view.physicalSize = const Size(750, 1334);
-    tester.view.devicePixelRatio = 2;
-    addTearDown(tester.view.reset);
+  testWidgets(
+    'the interface stays Simplified Chinese, with no language picker',
+    (tester) async {
+      tester.view.physicalSize = const Size(750, 1334);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(_app());
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_app());
+      await tester.pumpAndSettle();
 
-    final languageTile = find.text(l10nEn.settingsLanguageLabel);
-    await tester.scrollUntilVisible(
-      languageTile,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(languageTile);
-    await tester.pumpAndSettle();
-
-    final dialogList = find.descendant(
-      of: find.byType(AlertDialog),
-      matching: find.byType(Scrollable),
-    );
-    expect(dialogList, findsOneWidget);
-
-    final lastLanguage = find.text('Español');
-    await tester.scrollUntilVisible(lastLanguage, 100, scrollable: dialogList);
-    await tester.tap(lastLanguage);
-    await tester.pumpAndSettle();
-
-    expect(
-      tester
-          .widget<RadioGroup<String>>(find.byType(RadioGroup<String>))
-          .groupValue,
-      'es',
-    );
-    final actions = tester.getRect(
-      find
-          .descendant(
-            of: find.byType(AlertDialog),
-            matching: find.byType(TextButton),
-          )
-          .last,
-    );
-    expect(
-      tester.getRect(lastLanguage).bottom,
-      lessThanOrEqualTo(actions.top),
-      reason: 'the row must sit above the buttons, not under them',
-    );
-  });
+      expect(find.text(l10nEn.settingsLanguageLabel), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text(l10nEn.appLookLabel),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text(l10nEn.appLookLabel), findsOneWidget);
+    },
+  );
 
   testWidgets('toggling Show Meal Macros reloads the Diary, whose meal '
       'headers read the flag from DiaryBloc (#1359)', (tester) async {

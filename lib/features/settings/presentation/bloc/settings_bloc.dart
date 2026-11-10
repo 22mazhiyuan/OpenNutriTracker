@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:opennutritracker/core/data/data_source/remote_search_cache_data_source.dart';
+import 'package:opennutritracker/core/domain/entity/app_look.dart';
 import 'package:opennutritracker/core/domain/entity/app_theme_entity.dart';
 import 'package:opennutritracker/core/domain/entity/body_weight_unit_entity.dart';
 import 'package:opennutritracker/core/domain/entity/tracked_day_entity.dart';
@@ -100,6 +101,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   void setAppTheme(AppThemeEntity appTheme) async {
     await _addConfigUsecase.setConfigAppTheme(appTheme);
+  }
+
+  Future<void> setAppLook(AppLook look) {
+    return _addConfigUsecase.setConfigAppLook(look);
   }
 
   void setUsesImperialUnits(bool usesImperialUnits) {
